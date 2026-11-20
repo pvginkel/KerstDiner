@@ -5,8 +5,8 @@ one admin page. It is generated from ModernAppTemplate: Flask, React, PostgreSQL
 admin page only. It runs at `kerst2026.ginbov.nl`.
 
 - **A household** opens the link you emailed them. They confirm who is coming (the form is filled in
-  with your guess), then click dish tiles to take a dish or give it back. Each tile says how many
-  people the dish is for.
+  with your guess), then click dish and servies tiles to take one or give it back. Each dish tile
+  says how many people the dish is for.
 - **You** see everyone's answers on `/admin`, behind your OIDC login, and copy or replace each
   household's link there.
 - **Households, dishes and servies** live in one YAML file in the repo. I edit it when you tell me
@@ -42,42 +42,55 @@ The household's page is `/p/<link token>`. The UI is Dutch, and the first visit 
 attendance question:
 
 - **"Komen jullie?"** has two answers: *Ja, we komen* or *Nee, helaas niet*.
-- **"Met wie?"** has four counters: *Vegan*, *Vegetarisch*, *Eet alles* and *Kinderen*. They start at
-  your guess, under the line "Dit is onze inschatting — klopt het?", and *Opslaan* saves them.
+- **"Met wie?"** opens on *Ja, we komen*. It has four counters: *Vegan*, *Vegetarisch*, *Eet alles*
+  and *Kindermenu <6jr*, which counts only the children under 6; older children count as adults
+  do. On the first visit they start at your guess, under the line "Dit is onze inschatting — klopt
+  het?", and *Opslaan* saves them, at least one person.
 - **After saving**, the form folds into one line, such as "Jullie komen met 5: 1 vegetarisch, 2 eet
-  alles, 2 kinderen", with a *Wijzigen* link.
+  alles, 2 kindermenu's", or "Jullie komen helaas niet", with a *Wijzigen* link that opens the form
+  again on the saved answer.
 
-**"Wat nemen jullie mee?"** is a grid of tiles, each with a photo, the dish's name and "Voor 10
-personen, waarvan 2 kinderen". A tile is in one of three states:
+**"Wat nemen jullie mee?"** is a grid of tiles, each with a photo, the dish's name and "Voor 8
+personen": the vegans, vegetarians and eet alles it is made for, never the kindermenu's. Below it,
+**"Servies"** is a second grid, a tile per servies item with its photo and its text, such as "20
+borden", and nothing about how many people it is for. A tile is in one of three states:
 
-- *Nog vrij*: clicking it takes the dish.
-- *Dit maken jullie*: highlighted, and clicking it gives the dish back.
-- *Familie Jansen maakt dit*: another household has it, and the tile can't be clicked.
+- *Nog vrij*: clicking it takes the dish or the servies item.
+- *Dit maken jullie* (a servies tile: *Dit nemen jullie mee*): highlighted, and clicking it gives it
+  back.
+- *Familie Jansen maakt dit* (a servies tile: *Familie Jansen neemt dit mee*): another household has
+  it, and the tile can't be clicked.
 
 How the page behaves:
 
-- **Before answering:** the tiles are shown but can't be clicked until the household has answered.
-- **Declining:** the household's dishes are released, after a confirmation.
+- **Before answering:** the tiles are shown but can't be clicked until the household says it comes,
+  and a line over them says so. The same holds after declining.
+- **Declining:** after a confirmation, the household's dishes and servies are released.
 - **Staying current:** the page refreshes the tiles every 30 seconds and whenever it regains focus.
-- **Two households clicking the same dish at once:** the second one gets "Dit gerecht is net door
-  Familie Jansen gekozen", and the tiles refresh.
-- **Without a valid link:** the bare address, or a link that has been replaced, shows "Gebruik de
-  persoonlijke link uit je e-mail".
+- **Two households clicking the same tile at once:** the second one gets "Dit gerecht is net door
+  Familie Jansen gekozen", or "Dit servies is net door Familie Jansen gekozen", and the tiles
+  refresh.
+- **Without a valid link:** the bare address, or a link that is unknown or has been replaced, shows
+  "Gebruik de persoonlijke link uit je e-mail", also when the link is replaced while the page is
+  open, at its next refresh.
 
 ## What we see
 
 `/admin` sits behind OIDC and is in Dutch too. It has one table with a row per household, in config
 order, and a totals row:
 
-| Huishouden | Antwoord | Vegan | Vegetarisch | Eet alles | Kinderen | Beantwoord | Link |
+| Huishouden | Antwoord | Vegan | Vegetarisch | Eet alles | Kindermenu <6jr | Beantwoord | Link |
 |---|---|---|---|---|---|---|---|
 | Familie Jansen | Komt | 0 | 1 | 2 | 2 | 21 nov 14:02 | *Kopieer* · *Nieuwe link* |
 | Oma en opa | Nog geen antwoord (schatting) | 0 | 0 | 2 | 0 | — | *Kopieer* · *Nieuwe link* |
+| Totaal | 7 personen | 0 | 1 | 4 | 2 | | |
 
 - **Totals:** they include the guesses of households that haven't answered yet, the same numbers the
-  dish tiles use.
+  dish tiles use, and the number of people, the young children included.
+- **Kopieer:** copies the household's link, `/p/<link token>` on the site's address; the button
+  says *Gekopieerd* for a moment.
 - **Nieuwe link:** after a confirmation, it replaces a household's link, and the old link stops
-  working.
+  working. A toast says so, as the table does not show the link.
 - **Our own household:** it is a row like the others, and we use its link to take dishes.
 - **Dishes:** the admin page doesn't show them. The dish page already does.
 
@@ -415,8 +428,16 @@ Open questions: none.
   service has `admin` as its admin role, so a signed-in caller without it gets `403`.
 - **Frontend:** a route marks itself public with an attribute on its route definition (TanStack
   Router's `staticData: { public: true }`). The login gate and the 401-to-login redirect skip every
-  route that carries it. `/` and `/p/$token` carry it, and `/admin` doesn't. This changes
-  template-owned files (the auth gate and its provider), and you sync that back to the template.
+  route that carries it. `/` and `/p/$token` carry it, and `/admin` doesn't. A public route handles
+  its own 401s: the household page shows the line for an invalid link. The auth check still runs on
+  a public route, but nothing waits on it.
+  - **How:** `src/lib/auth-redirect.ts` declares the attribute and asks, through a check that
+    `App.tsx` registers with the router, whether the location the browser is on is public. The
+    generated API client's 401 middleware (`scripts/generate-api.js`) redirects only off a public
+    route, and the `AuthGate` renders a public route's page at once.
+  - **Template-owned files changed here,** which you sync back to the template: those four, and
+    the template's auth specs (`tests/infrastructure/auth/auth.spec.ts`), which now run on
+    `/admin`, as `/` is public.
 - **Risk:** anyone holding a household's link can act as that household. That is fine for family;
   *Nieuwe link* is the fix for a leaked one.
 
@@ -468,10 +489,16 @@ gets a non-critical check on its `/healthz`, registered when the bridge is confi
     `/v1/submit` and `/healthz` in `backend/tests/support/`, served over HTTP on a free port, which
     records what it was sent and can be told to fail.
 - **Playwright:**
-  - The household page: answering, taking, releasing, a lost race and declining.
+  - The household page: answering, taking, releasing, a lost race and declining, servies included.
   - The admin page: the table, copying a link and replacing one.
-  - Public routes rendering without a login.
-  - A testing endpoint, `POST /api/testing/reset`, resets the state.
+  - Public routes rendering without a login, and `/admin` sending to the login without one. The
+    test backends run without OIDC, so "without a login" is the template's forced `401` on the
+    auth check.
+  - A testing endpoint, `POST /api/testing/reset`, resets the state to a small test config before
+    each spec, and a spec acts as another household through the household endpoints.
+  - The test backends have no bridge configured, so the reports their changes queue are never
+    sent: no spec reaches the Telegram group. The report texts are the backend tests' to check,
+    against the stand-in.
 
 ## Out of scope
 
