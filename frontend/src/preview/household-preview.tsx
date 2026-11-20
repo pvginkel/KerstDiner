@@ -50,7 +50,7 @@ export function HouseholdPreview() {
         <section>
           <FestiveSectionTitle>Wat nemen jullie mee?</FestiveSectionTitle>
           <ClaimTileGrid>
-            <ClaimTile photo={pompoensoep} title="Pompoensoep" detail="Voor 8 personen" state="mine" status="Dit maken jullie" />
+            <ClaimTile photo={pompoensoep} title="Pompoensoep" detail="Voor 8 personen" state="yours" status="Dit maken jullie" />
             <ClaimTile photo={groenten} title="Geroosterde groenten" detail="Voor 8 personen" state="free" status="Nog vrij" />
             <ClaimTile photo={rollade} title="Rollade" detail="Voor 8 personen" state="taken" status="Familie Jansen maakt dit" />
             <ClaimTile photo={chocolademousse} title="Chocolademousse" detail="Voor 8 personen" state="free" status="Nog vrij" />
@@ -61,7 +61,7 @@ export function HouseholdPreview() {
           <FestiveSectionTitle>Servies</FestiveSectionTitle>
           <ClaimTileGrid>
             <ClaimTile photo={borden} title="20 borden" state="free" status="Nog vrij" />
-            <ClaimTile photo={glazen} title="20 wijnglazen" state="mine" status="Dit nemen jullie mee" />
+            <ClaimTile photo={glazen} title="20 wijnglazen" state="yours" status="Dit nemen jullie mee" />
             <ClaimTile photo={bestek} title="20 sets bestek" state="taken" status="Familie Jansen neemt dit mee" />
           </ClaimTileGrid>
         </section>
