@@ -1,0 +1,43 @@
+# KubeCoder environment manifest for the KerstDiner monorepo.
+#
+# One sidecar rather than `python` + `frontend`: the Playwright harness boots the
+# Flask backend per worker (frontend/tests/support/process/servers.ts), so a
+# single command needs both toolsets in the same container.
+#
+# `postgres` serves the dev stack's database: the backend's default
+# DATABASE_URL points at localhost:5432/kerstdiner, and `kc project setup`
+# creates that database and applies the migrations. The backend suite and
+# Playwright (a clone of a seed database per worker) create their own
+# databases on the same server (TEST_DATABASE_ADMIN_URL) and never touch the
+# dev one.
+#
+# No imageBuilder: both Dockerfiles are built by Jenkins with
+# helmCharts.kaniko2(...), and nothing builds an image from inside this
+# environment.
+
+repos:
+  # The AI workflow's spec repository, shared across every environment that
+  # works on KerstDiner.
+  - url: https://github.com/pvginkel/KerstDinerSpecs
+    shared: true
+
+capabilities:
+  github: rw
+
+tools:
+  - use: modern-app
+  # arch-validate, for the architecture model's lint step (project.yaml); the
+  # AaC/KerstDiner job runs the same command.
+  - use: aac-tools
+
+services:
+  - postgres
+
+ports:
+  - name: frontend
+    port: 3700
+    type: http
+    sslOffload: true
+  - name: backend
+    port: 3701
+    type: http

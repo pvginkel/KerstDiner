@@ -1,0 +1,69 @@
+# KerstDiner
+
+The family's Christmas dinner of 25 December 2026: who comes, and who brings which dish and servies
+
+## Repo structure
+
+- **Root** — the `run-suite` orchestrator (`tools/suite_runner/`, CI's single entry point), the
+  shared `Procfile.dev` dev stack and its `scripts/dev.py` launcher, the `Jenkinsfile`, and the
+  `Jenkinsfile.architecture` that publishes the architecture model in `docs/architecture/`.
+- **`backend/`** — the Flask API (Python, uv).
+- **`frontend/`** — the React + Vite SPA (TypeScript, pnpm) with TanStack Router/Query, an
+  OpenAPI-generated client, and a Playwright E2E suite that boots the backend per worker.
+
+Everything builds through `kc project build|test|lint|setup`, run **from the repo root** — those
+verbs are cwd-bound. The toolchain lives in the `modern-app` sidecar, so ad-hoc `uv`/`pnpm`
+commands need `cexec modern-app`. The root and `backend/` are two uv projects, each with its own
+`uv.lock`; `kc project setup` writes both on a fresh app, and they are committed, because CI and the
+image sync `--locked`. `scripts/dev.py` starts the dev stack and `scripts/dev.py stop`
+stops it from another shell. After a backend API change, `scripts/regenerate-openapi.py --frontend`
+refreshes the frontend's OpenAPI cache and client; a backend test fails while the committed cache
+is stale. `cexec modern-app python3 scripts/check_updates.py` reports the dependencies with a
+newer release, major, minor and patch, in every component it finds.
+
+## Template ownership
+
+The root, `backend/` and `frontend/` are each generated from a ModernAppTemplate Copier template
+(`.copier-answers.yml` in each). Files are either **template-owned** (overwritten by
+`copier update`) or **app-owned** (generated once, never overwritten). Never modify a
+template-owned file to add app behaviour; use the extension points instead:
+
+| Need | Put it in |
+|------|-----------|
+| New API endpoints | `backend/app/api/`, registered in `register_blueprints()` in `backend/app/startup.py` |
+| New services | `backend/app/services/`, wired in `backend/app/services/container.py` |
+| Side effects after a request's commit | `after_commit()` from `backend/app/utils/after_commit.py` |
+| CLI commands, post-migration logic | `backend/app/startup.py` |
+| Test fixtures | `backend/tests/conftest.py`, `frontend/tests/support/fixtures.ts` |
+| Sidecars CI must wait for | `backend/scripts/wait-for-services.py` (the suite runner calls it) |
+
+If the template lacks an extension point you need, add it to the template first.
+
+## Architecture model
+
+KerstDiner is a producer in the estate's federated architecture model. Its model is
+hand-authored in `docs/architecture/*.yaml`. `Jenkinsfile.architecture`, the job
+`AaC/KerstDiner`, validates it against the architecture service on every push and archives it
+for AaC/Architecture to collect; `kc project lint` validates it too (`arch-validate`, in the
+`aac-tools` sidecar).
+
+The model is kept current centrally, not from here: the central architecture update in
+`pvginkel/Architecture` (`tooling/fleet.py update`) reads the commits since the model last changed
+and commits what they change in it. Nothing needs to run here after a change.
+
+**While `docs/architecture/` holds no model, nudge the operator to seed it.** A new app starts
+without one, and the AaC job has nothing to validate until it exists. In order:
+
+1. Seed the model with the `/seed-architecture` skill. It is not installed here: it comes with the
+   kit that `python3 tooling/fleet.py stage KerstDiner`, run in the Architecture repo, stages
+   into a clone of this repo. It is interactive (the operator triages the candidate elements), so it
+   runs in a session of its own.
+2. Commit and push the model.
+3. The operator creates the job `AaC/KerstDiner` through the Jenkins API, from the pipeline
+   guide's `config.xml` template (Script Path `Jenkinsfile.architecture`), and registers the
+   producer in Architecture's `pipeline-producers.yaml` (`repo: pvginkel/KerstDiner`,
+   `jenkinsJob: AaC/KerstDiner`).
+
+`Jenkinsfile.architecture` is the app's own, and `copier update` leaves it alone. A repo with a
+backend and a frontend model validates each in a stage of its own (the pipeline guide's app
+architecture type); the lint step in `.kubecoder/project.yaml` then names both.

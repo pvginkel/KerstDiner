@@ -1,0 +1,22 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v0.4.0
+_src_path: ../ModernAppTemplate
+author_email: pvginkel@gmail.com
+author_name: Pieter van Ginkel
+backend_image: kerstdiner
+backend_image_pin_key: kerstdiner
+backend_port: 3701
+database_name: kerstdiner
+deploy_repo: pvginkel/KerstDinerDeploy
+frontend_image: kerstdiner-ui
+frontend_image_pin_key: kerstdinerUI
+frontend_port: 3700
+github_owner: pvginkel
+project_description: 'The family''s Christmas dinner of 25 December 2026: who comes,
+    and who brings which dish and servies'
+project_name: kerstdiner
+repo_name: KerstDiner
+use_database: true
+use_frontend: true
+use_s3: false
+use_sse: false
