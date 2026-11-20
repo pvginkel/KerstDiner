@@ -2,7 +2,7 @@
 
 KerstDiner is the site the family uses to arrange Christmas dinner. It has one page per household and
 one admin page. It is generated from ModernAppTemplate: Flask, React, PostgreSQL, and OIDC for the
-admin page only.
+admin page only. It runs at `kerst2026.ginbov.nl`.
 
 - **A household** opens the link you emailed them. They confirm who is coming (the form is filled in
   with your guess), then click dish tiles to take a dish or give it back. Each tile says how many
@@ -11,64 +11,30 @@ admin page only.
   household's link there.
 - **Households and dishes** live in one YAML file in the repo. I edit it when you tell me in chat,
   and each deploy syncs it into the database.
-- **Every change** a household makes is reported to your Telegram chat.
+- **Every change** a household makes is reported to one Telegram chat.
 
 The app has no S3 storage, no live push, and no editing screens.
 
-## Four questions for you
+## Decided
 
-### 1. A dish counts everyone who can eat it; config can narrow it
+Ruled by the operator on 2026-11-20.
 
-**Recommended:** a dish's number counts every guest who can eat it.
-
-- A vegan dish counts everyone.
-- A vegetarian dish counts everyone except the vegans.
-- A normal dish counts the normal eaters and the kids.
-
-Kids count as normal eaters and are shown separately: "Voor 10 personen, waarvan 2 kinderen". The
-menu config can narrow a dish to the groups it is meant for.
-
-Why narrowing is needed: without it, a vegan alternative main is counted for all 10 guests, when it
-is meant for the 2 who don't eat meat. It costs one optional line per dish in the config and nothing
-in the UI.
-
-Alternatives:
-
-- **No narrowing.** Simpler, but every alternative dish is over-counted.
-- **A dish counts only the guests of its own diet.** This is right for alternatives but wrong for
-  shared dishes: a vegan soup meant for everyone would say "voor 1".
-
-Record: none. The request only says "In the background every dish has vegan/vega/normal".
-
-### 2. The site stores who makes each dish now, with no history
-
-**Recommended:** store only who makes each dish now. The Telegram reports are the history of who
-took and released what.
-
-Alternative: store every take and release with its time. That costs a table and a rule that a dish
-has one open claim, and nothing on the site would show the history.
-
-### 3. Changes are reported through the notification bridge to your Telegram chat
-
-The app can't use the broadcast MCP server. That server only speaks MCP: it is a thin wrapper over
-Telegram's Bot API that posts to a fixed list of chats.
-
-**Recommended:** send through the notification bridge (`pvginkel/Notifications`). It would use a
-`kerstdiner` registration whose Telegram channel is the broadcast bot and its chats, so the messages
-land in the same place the broadcast server's do. This also needs your approval for a fake of the
-bridge in the tests, like the one Pilot uses (TEST-1 needs your approval for any fake).
-
-Cost: one registration in NotificationsDeploy, and one vault entry for its token.
-
-Alternative: call Telegram's Bot API directly with the broadcast bot's token. That needs no
-registration, but the app then holds a second copy of the bot token, and the tests need a fake
-Telegram instead.
-
-### 4. The public address is kerstdiner.ginbov.nl
-
-**Recommended:** `kerstdiner.ginbov.nl`, published to the internet the same way as
-`parts.ginbov.nl`, which is the only public precedent I found. Households open the site from their
-own homes, so a `.home` address won't work. If you prefer another name, tell me.
+- **Dish counts: a matrix per dish.** Each dish lists the guest groups it is made for, and its number
+  counts those groups. The operator asked for "a compatibility matrix per dish". This design reads it
+  as *made for*, not *can eat*: the meat replacement is made for the vegans and vegetarians, although
+  the meat eaters could eat it too. With that, the dish needs no separate vegan/vega/normal label.
+- **No claim history:** "Sure. Less is more :)".
+- **Change reports go through the notification bridge** to one Telegram chat. "It'll be a single
+  Telegram notification channel, and I'll add it to a group at my end, and share the group." The
+  tests use a stand-in for the bridge, which the operator approved.
+- **Address:** `kerst2026.ginbov.nl`.
+- **Public routes:** both the backend and the frontend mark a route as public with an attribute.
+  Template-owned files change in this app, and the operator syncs the changes back to the template.
+- **Data and rollout:**
+  - The app starts with test data, and the operator tests it in production.
+  - Once everything is ready, one reset clears it. Then the real households and dishes go in and the
+    links go out.
+- **Built through a Pilot project.** Mariska adds her ideas there.
 
 ## What a household sees
 
@@ -98,8 +64,6 @@ How the page behaves:
 - **Without a valid link:** the bare address, or a link that has been replaced, shows "Gebruik de
   persoonlijke link uit je e-mail".
 
-Each tile shows the dish's name and photo. The diet stays in the background, as you asked.
-
 ## What we see
 
 `/admin` sits behind OIDC and is in Dutch too. It has one table with a row per household, in config
@@ -120,9 +84,11 @@ order, and a totals row:
 ## The config file
 
 One file, `backend/app/data/kerstdiner.yaml`, holds the households and the menu. You give me the
-contents in chat. I commit them, and the deploy applies them.
+contents in chat. I commit them, and the deploy applies them. The first version holds test data.
 
 ```yaml
+reset: 1    # raise to wipe every answer, claim and link on the next deploy
+
 households:
   - key: jansen
     name: Familie Jansen
@@ -133,18 +99,19 @@ households:
 
 dishes:
   - key: soep
-    name: Pompoensoep
-    diet: vegan
+    name: Pompoensoep             # no "for": made for everyone
     image: pompoensoep.jpg
+  - key: groenten
+    name: Geroosterde groenten
+    image: groenten.jpg
   - key: rollade
     name: Rollade
-    diet: normaal
+    for: [normaal, kind]
     image: rollade.jpg
-  - key: linzenbrood
-    name: Linzenbrood
-    diet: vegan
-    for: [vegan, vegetarisch]    # optional (question 1): who it is meant for
-    image: linzenbrood.jpg
+  - key: wellington
+    name: Linzen-wellington
+    for: [vegan, vegetarisch]
+    image: wellington.jpg
 ```
 
 How a deploy applies it:
@@ -160,6 +127,9 @@ How a deploy applies it:
 - **Keys:** a `key` never changes. Renaming a household means changing its `name`.
 - **Photos:** they go in `frontend/public/gerechten/`. A dish without a photo shows a neutral
   placeholder.
+- **Reset:** when `reset` is higher than the value last applied, the deploy clears every answer,
+  claim and link, then applies the file as if for the first time. Every household is back on your
+  guess, with a new link. This is the one reset that swaps the test data for the real data.
 
 ## Change reports
 
@@ -179,18 +149,20 @@ How a message is sent:
   transaction.
 - **Sent in the background:** a background thread in the backend sends queued messages in order and
   marks each one sent.
+- **Where it goes:** each message goes to the notification bridge under a `kerstdiner` registration.
+  That registration has one Telegram chat: a group you create, add the bot to, and share.
 - **Failures:** a failed send stays queued and is tried again a minute later.
 
 This way a household's click never waits on Telegram or fails because of it, and no report is lost.
 The queue is plumbing: it is not part of the data model. The backend runs as one replica.
 
-Replacing a link is not reported.
+Replacing a link, and a reset, are not reported.
 
 ## Data model
 
 **Scope.** The households invited, the people each brings by guest category, the dishes on the menu,
-and which household makes each. This is a concept model: cardinalities are maxima only, and the
-diagram's inner symbols carry no meaning.
+who each dish is made for, and which household makes each. This is a concept model: cardinalities
+are maxima only, and the diagram's inner symbols carry no meaning.
 
 ### Entities
 
@@ -203,14 +175,14 @@ alone.
 - The people a Party brings are counted, never named.
 - Its answer is one of *nog geen antwoord*, *komt* or *komt niet*.
 - Also called: huishouden (the UI's word, and the config's).
-- Changes: current state only. The Telegram reports are the record of what changed.
+- Changes: current state only. The history is not wanted ("Less is more", the operator, 2026-11-20),
+  and the Telegram reports are the record of what changed.
 
-*Guest Category.* A Guest Category is a kind of guest the dinner caters for, by what they eat and
-whether they are a child. There are exactly four.
+*Guest Category.* A Guest Category is a kind of guest the dinner caters for. There are exactly four.
 
 - Samples: vegan, vegetarisch, normaal, kind.
-- A child is counted as kind, and kind eats normaal. Parents of a vegan child count that child under
-  vegan.
+- A child is counted as kind. Parents of a vegan or vegetarian child count that child under vegan or
+  vegetarisch.
 - The UI calls normaal *Eet alles*.
 
 *Guest Count.* A Guest Count is the number of people of one Guest Category that one Party brings. It
@@ -220,18 +192,14 @@ is your guess until the Party answers, and the Party's own number after that.
 - Every Party has one Guest Count per category, zero included.
 - Changes: current state only, for the same reason as Party.
 
-*Diet.* A Diet is a kind of food by what it contains: vegan, vegetarisch or normaal, ranked in that
-order. A Dish of a Diet can be eaten by every Guest Category whose own Diet ranks the same or later.
+*Dish.* A Dish is one dish on the Christmas menu, made by one Party for the guests it is made for.
+This includes a Dish nobody has taken yet.
 
-- Samples: vegan, vegetarisch, normaal.
-- The tiles don't show the Diet. It sets who a Dish is meant for by default.
-
-*Dish.* A Dish is one dish on the Christmas menu, made by one Party for the whole dinner. This
-includes a Dish nobody has taken yet.
-
-- Samples: Pompoensoep, Rollade, Linzenbrood, Kaasplank, Tiramisu.
+- Samples: Pompoensoep, Geroosterde groenten, Rollade, Linzen-wellington, Chocolademousse.
 - A Dish is not a course. Courses aren't modelled, and the tiles follow the config's order.
-- Changes: the Party that makes it is current state only, pending question 2.
+- *Made for* is not *can eat*. A meat eater can eat the Linzen-wellington, but it is made for the
+  vegans and vegetarians.
+- Changes: the Party that makes it is current state only, for the same reason as Party.
 
 ### Diagram
 
@@ -244,9 +212,6 @@ erDiagram
     Dish {
         string name
     }
-    Diet {
-        string name
-    }
     GuestCount["Guest Count"] {
         int people
     }
@@ -255,11 +220,9 @@ erDiagram
     }
     Party ||--|{ GuestCount : "brings"
     GuestCategory ||..|{ GuestCount : "classifies"
-    Diet ||..|{ Dish : "classifies"
-    Diet ||..|{ GuestCategory : "is the diet of"
     Party ||..|{ Dish : "makes"
     %% Unresolved many-to-many: this is a concept model.
-    Dish }|..|{ GuestCategory : "is meant for"
+    Dish }|..|{ GuestCategory : "is made for"
 ```
 
 ### Assertions
@@ -268,26 +231,18 @@ erDiagram
 2. Each Guest Count is brought by one Party (also over time).
 3. Each Guest Category classifies one or more Guest Counts.
 4. Each Guest Count is classified by one Guest Category (also over time).
-5. Each Diet classifies one or more Dishes.
-6. Each Dish is classified by one Diet (also over time: a change in the config corrects it, it does
-   not date it).
-7. Each Diet is the diet of one or more Guest Categories.
-8. Each Guest Category has one Diet (also over time): vegan has vegan, vegetarisch has vegetarisch,
-   normaal and kind have normaal.
-9. Each Party makes one or more Dishes.
-10. Each Dish is made by one Party (one at a time, many over time → question 2 recommends no
-    history).
-11. Each Dish is meant for one or more Guest Categories.
-12. Each Guest Category is catered for by one or more Dishes.
-13. Each Party has exactly one Guest Count for each Guest Category, and zero is a count.
-14. A Dish is meant only for Guest Categories whose Diet ranks the same as, or later than, the Dish's
-    Diet. Unless the config names them, it is meant for all of those. The path through Diet and the
-    "is meant for" line may therefore differ: the config narrows.
-15. A Dish's number of people is derived: the sum, over every Party, of the Guest Counts of the Guest
-    Categories it is meant for. Its kind part is shown separately.
-16. A Party that declines has every Guest Count at zero and makes no Dish.
-17. A Party's Guest Counts are your guess until the Party answers. After that, only the Party changes
-    them.
+5. Each Party makes one or more Dishes.
+6. Each Dish is made by one Party (history not wanted: "Sure. Less is more :)", the operator,
+   2026-11-20).
+7. Each Dish is made for one or more Guest Categories.
+8. Each Guest Category is catered for by one or more Dishes.
+9. Each Party has exactly one Guest Count for each Guest Category, and zero is a count.
+10. A Dish the config names no Guest Categories for is made for all four.
+11. A Dish's number of people is derived: the sum, over every Party, of the Guest Counts of the Guest
+    Categories it is made for. Its kind part is shown separately.
+12. A Party that declines has every Guest Count at zero and makes no Dish.
+13. A Party's Guest Counts are your guess until the Party answers. After that, only the Party changes
+    them, until a reset.
 
 ### Sample instances
 
@@ -299,18 +254,12 @@ erDiagram
 | Familie de Boer | komt niet |
 | Wij | komt |
 
-| Guest Category | Diet |
-|---|---|
-| vegan | vegan |
-| vegetarisch | vegetarisch |
-| normaal | normaal |
-| kind | normaal |
-
-| Diet | rank |
-|---|---|
-| vegan | 1 |
-| vegetarisch | 2 |
-| normaal | 3 |
+| Guest Category |
+|---|
+| vegan |
+| vegetarisch |
+| normaal |
+| kind |
 
 The Guest Count table leaves zeros out, except one:
 
@@ -324,24 +273,23 @@ The Guest Count table leaves zeros out, except one:
 | Familie de Boer | normaal | 0 (declined) |
 | Wij | normaal | 2 |
 
-| Dish | Diet | made by | meant for | people (derived) |
-|---|---|---|---|---|
-| Pompoensoep | vegan | Tante Els | vegan, vegetarisch, normaal, kind | 10, waarvan 2 kinderen |
-| Rollade | normaal | Wij | normaal, kind | 8, waarvan 2 kinderen |
-| Linzenbrood | vegan | — | vegan, vegetarisch (narrowed) | 2 |
-| Kaasplank | vegetarisch | Familie Jansen | vegetarisch, normaal, kind | 9, waarvan 2 kinderen |
-| Tiramisu | vegetarisch | Familie Jansen | vegetarisch, normaal, kind | 9, waarvan 2 kinderen |
+| Dish | made by | made for | people (derived) |
+|---|---|---|---|
+| Pompoensoep | Tante Els | vegan, vegetarisch, normaal, kind | 10, waarvan 2 kinderen |
+| Geroosterde groenten | Wij | vegan, vegetarisch, normaal, kind | 10, waarvan 2 kinderen |
+| Rollade | Wij | normaal, kind | 8, waarvan 2 kinderen |
+| Linzen-wellington | — | vegan, vegetarisch | 2 |
+| Chocolademousse | Familie Jansen | vegetarisch, normaal, kind | 9, waarvan 2 kinderen |
 
 ### Decisions and open questions
 
 Decisions:
 
-- The four Guest Categories and three Diets are fixed in code, not in the config.
+- The four Guest Categories are fixed in code, not in the config.
 - Declining sets the counts to zero rather than keeping them aside.
+- A Dish lists who it is made for, not who can eat it (see Decided, above).
 
-Open questions: question 1 (what a dish's number counts) and question 2 (no claim history), at the
-top. If question 1 drops the narrowing, the "is meant for" line goes, assertions 11, 12 and 14 go
-with it, and the number follows from the Diet alone.
+Open questions: none.
 
 ## Architecture
 
@@ -359,12 +307,14 @@ with it, and the number follows from the Diet alone.
 
 ### Access
 
-- **Household routes:** they are `@public`, and each request carries the household's link token in
-  a header. The token is 128 random bits, URL-safe, and stored on the Party. An unknown or replaced
-  token is refused.
-- **Admin routes:** they require the admin role (`@allow_roles("admin")`).
-- **The one change to a template file:** the frontend wraps every route in its login gate. `/` and
-  `/p/*` need to skip it, which is a small change to the template-owned `auth-providers.tsx`.
+- **Backend:** household endpoints carry the template's `@public` attribute, which the OIDC hook
+  already skips. Each request carries the household's link token in a header. The token is 128 random
+  bits, URL-safe, and stored on the Party. An unknown or replaced token is refused.
+- **Admin endpoints:** they require the admin role (`@allow_roles("admin")`).
+- **Frontend:** a route marks itself public with an attribute on its route definition (TanStack
+  Router's `staticData: { public: true }`). The login gate and the 401-to-login redirect skip every
+  route that carries it. `/` and `/p/$token` carry it, and `/admin` doesn't. This changes
+  template-owned files (the auth gate and its provider), and you sync that back to the template.
 - **Risk:** anyone holding a household's link can act as that household. That is fine for family;
   *Nieuwe link* is the fix for a leaked one.
 
@@ -387,23 +337,28 @@ gets a non-critical check on its `/healthz`.
 
 - **The repo:** generated with Copier into this repo, then onboarded to KubeCoder (PostgreSQL
   service, toolchains).
-- **Deploy repo:** `KerstDinerDeploy`, with a chart on `homelab-shared`, `serverName` set to the
-  question 4 address, `isPublic: yes` and one replica. The init container runs `upgrade-db`, which
+- **Deploy repo:** `KerstDinerDeploy`, with a chart on `homelab-shared`, `serverName:
+  kerst2026.ginbov.nl`, `isPublic: yes` and one replica. The init container runs `upgrade-db`, which
   applies the YAML.
 - **Pipeline:** a Jenkins job, `KerstDiner`, builds the app, and Argo CD rolls it out.
 - **Secrets:** ExternalSecrets from OpenBao carry the OIDC client secret, the bridge token and the
   database credentials.
-- **Outside these repos:** an OIDC client in the identity provider, with your accounts in its admin
-  role, and the `kerstdiner` registration in NotificationsDeploy (question 3).
+- **Outside these repos:**
+  - an OIDC client in the identity provider, with your accounts in its admin role;
+  - the `kerstdiner` registration in NotificationsDeploy, with the Telegram bot and the group's chat
+    id that you set up.
 
 ## Testing
 
-- **Backend:** tests run against the real PostgreSQL, as the template does. They cover the config
-  sync, the answer and claim rules (including the race and declining), the admin endpoints and the
-  report queue, with the bridge fake from question 3.
+- **Backend:** tests run against the real PostgreSQL, as the template does. They cover:
+  - the config sync and the reset;
+  - the answer and claim rules, including the race and declining;
+  - the admin endpoints;
+  - the report queue, against the approved stand-in for the bridge.
 - **Playwright:**
   - The household page: answering, taking, releasing, a lost race and declining.
   - The admin page: the table, copying a link and replacing one.
+  - Public routes rendering without a login.
   - A testing endpoint resets the state.
 
 ## Out of scope
@@ -415,9 +370,13 @@ gets a non-critical check on its `/healthz`.
 
 ## Build order
 
+The work runs as a Pilot project.
+
 1. Generate the repo, onboard it, and set up the deploy repo, the OIDC client and the bridge
    registration.
-2. Backend: the model, the config sync, the endpoints and the report queue, with their tests.
-3. Frontend: the household page and the admin page, with their specs.
-4. Deploy. You send me the households with their guesses, and the dishes with their diet and photo,
-   in chat. I commit them, and you copy the links from `/admin`.
+2. Backend: the model, the config sync with its reset, the endpoints and the report queue, with their
+   tests.
+3. Frontend: the public-route attribute, the household page and the admin page, with their specs.
+4. Deploy with test data. You test in production.
+5. Raise `reset` and put in the real households (with their guesses) and dishes (with who each is
+   made for, and a photo). Deploy, then copy the links from `/admin` and send them out.
