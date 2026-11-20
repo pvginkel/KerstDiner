@@ -12,13 +12,18 @@
 import { test, expect } from '../../support/fixtures-infrastructure'
 import { AuthPage } from './AuthPage'
 
+// A route without staticData.public, where the AuthGate and the 401-to-login
+// redirect apply, and whose page shows the signed-in user's dropdown.
+// KerstDiner's '/' is public, so its specs use /admin.
+const PROTECTED_PATH = '/admin'
+
 test.describe('Authentication', () => {
   test.describe('Auth Loading State', () => {
     test('shows loading indicator before auth completes', async ({ page, auth }) => {
       await auth.clearSession()
       await auth.createSession({ name: 'Test User', roles: ['admin'] })
 
-      await page.goto('/')
+      await page.goto(PROTECTED_PATH)
 
       const authPage = new AuthPage(page)
       await authPage.waitForAuthenticated()
@@ -35,7 +40,7 @@ test.describe('Authentication', () => {
         request.url().includes('/api/auth/login')
       )
 
-      await page.goto('/')
+      await page.goto(PROTECTED_PATH)
 
       const loginRequest = await loginRequestPromise
       expect(loginRequest.url()).toContain('/api/auth/login')
@@ -68,7 +73,7 @@ test.describe('Authentication', () => {
     test('shows error screen when auth returns 500', async ({ page, auth }) => {
       await auth.forceError(500)
 
-      await page.goto('/')
+      await page.goto(PROTECTED_PATH)
 
       const authPage = new AuthPage(page)
 
@@ -81,7 +86,7 @@ test.describe('Authentication', () => {
       await auth.forceError(500)
       await auth.createSession({ name: 'Retry User', roles: ['admin'] })
 
-      await page.goto('/')
+      await page.goto(PROTECTED_PATH)
 
       const authPage = new AuthPage(page)
 
@@ -99,7 +104,7 @@ test.describe('Authentication', () => {
     test('displays user name in top bar when authenticated', async ({ page, auth }) => {
       await auth.createSession({ name: 'John Doe', roles: ['admin'] })
 
-      await page.goto('/')
+      await page.goto(PROTECTED_PATH)
 
       const authPage = new AuthPage(page)
       await authPage.waitForAuthenticated()
@@ -110,7 +115,7 @@ test.describe('Authentication', () => {
     test('displays "Unknown User" when name is null', async ({ page, auth }) => {
       await auth.createSession({ name: null, email: 'test@example.com', roles: ['admin'] })
 
-      await page.goto('/')
+      await page.goto(PROTECTED_PATH)
 
       const authPage = new AuthPage(page)
       await authPage.waitForAuthenticated()
@@ -123,7 +128,7 @@ test.describe('Authentication', () => {
     test('shows dropdown menu when clicking user name', async ({ page, auth }) => {
       await auth.createSession({ name: 'Dropdown User', roles: ['admin'] })
 
-      await page.goto('/')
+      await page.goto(PROTECTED_PATH)
 
       const authPage = new AuthPage(page)
       await authPage.waitForAuthenticated()
@@ -138,7 +143,7 @@ test.describe('Authentication', () => {
     test('clicking logout navigates to logout endpoint', async ({ page, auth }) => {
       await auth.createSession({ name: 'Logout User', roles: ['admin'] })
 
-      await page.goto('/')
+      await page.goto(PROTECTED_PATH)
 
       const authPage = new AuthPage(page)
       await authPage.waitForAuthenticated()

@@ -5,6 +5,7 @@
  */
 
 import { type ReactNode } from 'react';
+import { useMatches } from '@tanstack/react-router';
 import { useAuthContext } from '@/contexts/auth-context';
 import { Button } from '@/components/primitives/button';
 import { ApiError } from '@/lib/api/api-error';
@@ -179,9 +180,19 @@ function AuthError({ error, onRetry }: { error: Error; onRetry: () => void }) {
  * - Error (non-401/403): Shows error screen with retry button
  * - Unauthenticated (401): Middleware handles redirect, gate shows blank
  * - Authenticated: Renders children
+ *
+ * A public route (staticData: { public: true }) renders at once, whatever the
+ * auth state: it needs no login.
  */
 export function AuthGate({ children }: AuthGateProps) {
   const { isLoading, isAuthenticated, isForbidden, error, refetch, logout } = useAuthContext();
+  const isPublic = useMatches({
+    select: (matches) => matches.some((match) => match.staticData.public === true),
+  });
+
+  if (isPublic) {
+    return <>{children}</>;
+  }
 
   // Show loading state while auth check is in progress
   if (isLoading) {
