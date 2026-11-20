@@ -81,6 +81,26 @@ order, and a totals row:
 - **Our own household:** it is a row like the others, and we use its link to take dishes.
 - **Dishes:** the admin page doesn't show them. The dish page already does.
 
+## The style
+
+The whole site, the household page and `/admin`, is in an over-the-top Christmas style, as Mariska
+asked ("I like it over the top"). She approved it from screenshots on 2026-11-20.
+
+- **Colours and decoration:** red, green and gold on a dark green night sky, with fairy lights,
+  baubles, falling snow, gold sparkles and holly. Headings are in a festive font (Mountains of
+  Christmas), everything else in a readable one (Nunito).
+- **Deer and birds:** gold stags beside the page's title, and a snowy field at the bottom with deer,
+  robins and birds in flight.
+- **No Santa Claus** anywhere.
+- **Easy on a phone:** large plain text and buttons and tiles big enough to tap. The snow falls
+  behind the cards, and it stops for whoever asks their device for less motion.
+
+It lives in the frontend. The theme is `frontend/src/styles/app-theme.css`, with the button and card
+variants beside it. The decorations and the page's building blocks (frame, header, card, tile,
+counter) are in `frontend/src/components/kerst/`. Every asset is in the repo, with its licence in
+`frontend/src/assets/LICENSES.md`. The dev server's `/preview.html` shows the household page in the
+style with test content; production serves no preview.
+
 ## The config file
 
 One file, `backend/app/data/kerstdiner.yaml`, holds the households, the menu and the servies. You
