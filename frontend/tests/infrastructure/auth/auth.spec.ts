@@ -16,7 +16,7 @@ test.describe('Authentication', () => {
   test.describe('Auth Loading State', () => {
     test('shows loading indicator before auth completes', async ({ page, auth }) => {
       await auth.clearSession()
-      await auth.createSession({ name: 'Test User', roles: ['editor'] })
+      await auth.createSession({ name: 'Test User', roles: ['admin'] })
 
       await page.goto('/')
 
@@ -79,7 +79,7 @@ test.describe('Authentication', () => {
 
     test('retry button triggers new auth check', async ({ page, auth }) => {
       await auth.forceError(500)
-      await auth.createSession({ name: 'Retry User', roles: ['editor'] })
+      await auth.createSession({ name: 'Retry User', roles: ['admin'] })
 
       await page.goto('/')
 
@@ -97,7 +97,7 @@ test.describe('Authentication', () => {
 
   test.describe('Authenticated User Display', () => {
     test('displays user name in top bar when authenticated', async ({ page, auth }) => {
-      await auth.createSession({ name: 'John Doe', roles: ['editor'] })
+      await auth.createSession({ name: 'John Doe', roles: ['admin'] })
 
       await page.goto('/')
 
@@ -108,7 +108,7 @@ test.describe('Authentication', () => {
     })
 
     test('displays "Unknown User" when name is null', async ({ page, auth }) => {
-      await auth.createSession({ name: null, email: 'test@example.com', roles: ['editor'] })
+      await auth.createSession({ name: null, email: 'test@example.com', roles: ['admin'] })
 
       await page.goto('/')
 
@@ -121,7 +121,7 @@ test.describe('Authentication', () => {
 
   test.describe('Logout Flow', () => {
     test('shows dropdown menu when clicking user name', async ({ page, auth }) => {
-      await auth.createSession({ name: 'Dropdown User', roles: ['editor'] })
+      await auth.createSession({ name: 'Dropdown User', roles: ['admin'] })
 
       await page.goto('/')
 
@@ -136,7 +136,7 @@ test.describe('Authentication', () => {
     })
 
     test('clicking logout navigates to logout endpoint', async ({ page, auth }) => {
-      await auth.createSession({ name: 'Logout User', roles: ['editor'] })
+      await auth.createSession({ name: 'Logout User', roles: ['admin'] })
 
       await page.goto('/')
 
