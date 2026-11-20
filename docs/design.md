@@ -9,8 +9,8 @@ admin page only. It runs at `kerst2026.ginbov.nl`.
   people the dish is for.
 - **You** see everyone's answers on `/admin`, behind your OIDC login, and copy or replace each
   household's link there.
-- **Households and dishes** live in one YAML file in the repo. I edit it when you tell me in chat,
-  and each deploy syncs it into the database.
+- **Households, dishes and servies** live in one YAML file in the repo. I edit it when you tell me
+  in chat, and each deploy syncs it into the database.
 - **Every change** a household makes is reported to one Telegram chat.
 
 The app has no S3 storage, no live push, and no editing screens.
@@ -83,8 +83,9 @@ order, and a totals row:
 
 ## The config file
 
-One file, `backend/app/data/kerstdiner.yaml`, holds the households and the menu. You give me the
-contents in chat. I commit them, and the deploy applies them. The first version holds test data.
+One file, `backend/app/data/kerstdiner.yaml`, holds the households, the menu and the servies. You
+give me the contents in chat. I commit them, and the deploy applies them. The first version holds
+test data.
 
 ```yaml
 reset: 1    # raise to wipe every answer, claim and link on the next deploy
@@ -92,27 +93,45 @@ reset: 1    # raise to wipe every answer, claim and link on the next deploy
 households:
   - key: jansen
     name: Familie Jansen
-    guess: {vegan: 0, vegetarisch: 1, normaal: 2, kind: 2}
+    guess: {vegan: 0, vegetarisch: 1, normaal: 2, kind: 2}   # kind: children under 6
   - key: oma-opa
     name: Oma en opa
-    guess: {normaal: 2}
+    guess: {normaal: 2}           # a group left out is 0
 
 dishes:
   - key: soep
-    name: Pompoensoep             # no "for": made for everyone
+    name: Pompoensoep             # no "for": made for vegan, vegetarisch and normaal
     image: pompoensoep.jpg
   - key: groenten
     name: Geroosterde groenten
     image: groenten.jpg
   - key: rollade
     name: Rollade
-    for: [normaal, kind]
+    for: [normaal]
     image: rollade.jpg
   - key: wellington
     name: Linzen-wellington
     for: [vegan, vegetarisch]
     image: wellington.jpg
+
+servies:
+  - key: borden
+    text: 20 borden
+    image: borden.jpg
+  - key: glazen
+    text: 20 wijnglazen
 ```
+
+What it holds:
+
+- **A household's guess** counts *vegan*, *vegetarisch*, *normaal* (Eet alles) and *kind*
+  (Kindermenu <6jr): only children under 6 count as *kind*, and older children count as adults do.
+- **A dish's `for`** names *vegan*, *vegetarisch* and *normaal* at most. No dish is made for the
+  young children: the family arranges their food apart, and a `for` that names *kind* is an error.
+- **A servies item** has a `key`, a `text` that says what it is, such as "20 borden", and a photo. It
+  says nothing about how many people it is for.
+- **Errors:** an unknown field, a key used twice in a section, or a key other than lower-case
+  letters, digits and dashes fail the file.
 
 How a deploy applies it:
 
@@ -122,14 +141,18 @@ How a deploy applies it:
 - **New household:** it is created with your guess as its counts and a fresh link.
 - **Existing household that hasn't answered:** its name and counts follow the file.
 - **Existing household that has answered:** only its name follows the file. Their own numbers win.
-- **New or changed dish:** it follows the file, and whoever makes it keeps it.
-- **Removed household or dish:** it disappears from the site, and its claims go with it.
+- **New or changed dish or servies item:** it follows the file, and whoever makes or brings it keeps
+  it.
+- **Removed household, dish or servies item:** it disappears from the site, and its claims go with
+  it.
 - **Keys:** a `key` never changes. Renaming a household means changing its `name`.
-- **Photos:** they go in `frontend/public/gerechten/`. A dish without a photo shows a neutral
-  placeholder.
+- **Photos:** a dish's go in `frontend/public/gerechten/`, a servies item's in
+  `frontend/public/servies/`. A tile without a photo shows a neutral placeholder.
 - **Reset:** when `reset` is higher than the value last applied, the deploy clears every answer,
   claim and link, then applies the file as if for the first time. Every household is back on your
-  guess, with a new link. This is the one reset that swaps the test data for the real data.
+  guess, with a new link. This is the one reset that swaps the test data for the real data. The
+  first deploy records the file's `reset` and clears nothing; a `reset` that is not higher clears
+  nothing either.
 
 ## Change reports
 
@@ -137,11 +160,17 @@ Each change a household saves produces one Telegram message, in Dutch, with an *
 `/admin`:
 
 ```
-Familie Jansen komt met 5: 1 vegetarisch, 2 eet alles, 2 kinderen.
+Familie Jansen komt met 5: 1 vegetarisch, 2 eet alles, 2 kindermenu's.
 Familie de Boer komt niet.
 Familie Jansen maakt Tiramisu.
 Familie Jansen maakt Tiramisu toch niet.
+Familie Jansen neemt 20 borden mee.
+Familie Jansen neemt 20 borden toch niet mee.
 ```
+
+The attendance line leaves out the groups at zero and counts the young children among who comes. A
+save that changes nothing sends nothing. Declining sends "komt niet" alone: the dishes and servies it
+releases are not reported one by one.
 
 How a message is sent:
 
@@ -149,8 +178,14 @@ How a message is sent:
   transaction.
 - **Sent in the background:** a background thread in the backend sends queued messages in order and
   marks each one sent.
-- **Where it goes:** each message goes to the notification bridge under a `kerstdiner` registration.
-  That registration has one Telegram chat: a group you create, add the bot to, and share.
+- **Where it goes:** each message goes to the notification bridge under a `kerstdiner` registration
+  (`POST /v1/submit`, the *Open* button its `url`, `BASEURL` + `/admin`). That registration has one
+  Telegram chat: a group you create, add the bot to, and share. A send counts as failed unless the
+  bridge answers that Telegram took it.
+- **Its configuration:** the deploy sets `NOTIFICATION_BRIDGE_URL` (the bridge's in-cluster address,
+  port 8090) and `NOTIFICATION_BRIDGE_TOKEN` (the registration's bearer token, a secret). Under
+  `FLASK_ENV=production` the backend refuses to start without them; elsewhere the messages stay
+  queued.
 - **Failures:** a failed send stays queued and is tried again a minute later.
 
 This way a household's click never waits on Telegram or fails because of it, and no report is lost.
@@ -161,7 +196,8 @@ Replacing a link, and a reset, are not reported.
 ## Data model
 
 **Scope.** The households invited, the people each brings by guest category, the dishes on the menu,
-who each dish is made for, and which household makes each. This is a concept model: cardinalities
+who each dish is made for, which household makes each, and the tableware each household brings
+along. This is a concept model: cardinalities
 are maxima only, and the diagram's inner symbols carry no meaning.
 
 ### Entities
@@ -181,9 +217,12 @@ alone.
 *Guest Category.* A Guest Category is a kind of guest the dinner caters for. There are exactly four.
 
 - Samples: vegan, vegetarisch, normaal, kind.
-- A child is counted as kind. Parents of a vegan or vegetarian child count that child under vegan or
-  vegetarisch.
-- The UI calls normaal *Eet alles*.
+- Only a child under 6 is counted as kind, and gets a kindermenu that the family arranges apart. An
+  older child counts under vegan, vegetarisch or normaal, as an adult does, and so does a younger
+  child whose parents count it there.
+- No Dish is made for kind: the young children come, and are counted among who comes, but the menu
+  does not cater for them.
+- The UI calls normaal *Eet alles* and kind *Kindermenu <6jr*.
 
 *Guest Count.* A Guest Count is the number of people of one Guest Category that one Party brings. It
 is your guess until the Party answers, and the Party's own number after that.
@@ -201,6 +240,16 @@ This includes a Dish nobody has taken yet.
   vegans and vegetarians.
 - Changes: the Party that makes it is current state only, for the same reason as Party.
 
+*Tableware Item.* A Tableware Item is one lot of tableware the dinner needs, such as 20 borden,
+brought along by one Party. This includes a Tableware Item nobody has taken yet.
+
+- Samples: 20 borden, 20 wijnglazen, 20 setjes bestek, 4 serveerschalen.
+- It is an individual, one lot: "20 borden" is one Tableware Item, which one Party brings whole. The
+  kind of tableware (a bord) is not modelled, and the number in its text is never counted.
+- It is not a Dish: it is made for nobody, and carries no number of people.
+- Also called: servies (the UI's word, and the config's).
+- Changes: the Party that brings it along is current state only, for the same reason as Party.
+
 ### Diagram
 
 ```mermaid
@@ -212,6 +261,9 @@ erDiagram
     Dish {
         string name
     }
+    TablewareItem["Tableware Item"] {
+        string text
+    }
     GuestCount["Guest Count"] {
         int people
     }
@@ -221,6 +273,7 @@ erDiagram
     Party ||--|{ GuestCount : "brings"
     GuestCategory ||..|{ GuestCount : "classifies"
     Party ||..|{ Dish : "makes"
+    Party ||..|{ TablewareItem : "brings along"
     %% Unresolved many-to-many: this is a concept model.
     Dish }|..|{ GuestCategory : "is made for"
 ```
@@ -236,13 +289,18 @@ erDiagram
    2026-11-20).
 7. Each Dish is made for one or more Guest Categories.
 8. Each Guest Category is catered for by one or more Dishes.
-9. Each Party has exactly one Guest Count for each Guest Category, and zero is a count.
-10. A Dish the config names no Guest Categories for is made for all four.
-11. A Dish's number of people is derived: the sum, over every Party, of the Guest Counts of the Guest
-    Categories it is made for. Its kind part is shown separately.
-12. A Party that declines has every Guest Count at zero and makes no Dish.
-13. A Party's Guest Counts are your guess until the Party answers. After that, only the Party changes
+9. Each Party brings along one or more Tableware Items.
+10. Each Tableware Item is brought along by one Party (history not wanted, as for assertion 6).
+11. Each Party has exactly one Guest Count for each Guest Category, and zero is a count.
+12. A Dish the config names no Guest Categories for is made for vegan, vegetarisch and normaal.
+13. No Dish is made for kind: a Dish is made for vegan, vegetarisch and normaal at most.
+14. A Dish's number of people is derived: the sum, over every Party, of the Guest Counts of the Guest
+    Categories it is made for. Kind is never part of it.
+15. A Party that declines has every Guest Count at zero, makes no Dish and brings along no Tableware
+    Item.
+16. A Party's Guest Counts are your guess until the Party answers. After that, only the Party changes
     them, until a reset.
+17. Who a Party brings, the people it counts under kind included, is the sum of its Guest Counts.
 
 ### Sample instances
 
@@ -275,11 +333,18 @@ The Guest Count table leaves zeros out, except one:
 
 | Dish | made by | made for | people (derived) |
 |---|---|---|---|
-| Pompoensoep | Tante Els | vegan, vegetarisch, normaal, kind | 10, waarvan 2 kinderen |
-| Geroosterde groenten | Wij | vegan, vegetarisch, normaal, kind | 10, waarvan 2 kinderen |
-| Rollade | Wij | normaal, kind | 8, waarvan 2 kinderen |
+| Pompoensoep | Tante Els | vegan, vegetarisch, normaal | 8 |
+| Geroosterde groenten | Wij | vegan, vegetarisch, normaal | 8 |
+| Rollade | Wij | normaal | 6 |
 | Linzen-wellington | — | vegan, vegetarisch | 2 |
-| Chocolademousse | Familie Jansen | vegetarisch, normaal, kind | 9, waarvan 2 kinderen |
+| Chocolademousse | Familie Jansen | vegetarisch, normaal | 7 |
+
+| Tableware Item | brought along by |
+|---|---|
+| 20 borden | Familie Jansen |
+| 20 wijnglazen | Wij |
+| 4 serveerschalen | Wij |
+| 20 setjes bestek | — |
 
 ### Decisions and open questions
 
@@ -288,6 +353,17 @@ Decisions:
 - The four Guest Categories are fixed in code, not in the config.
 - Declining sets the counts to zero rather than keeping them aside.
 - A Dish lists who it is made for, not who can eat it (see Decided, above).
+- **Kindermenu <6jr** (the members, 2026-11-20). Mariska: "The childeren are not counted in the
+  menu's. We need to kknow they come but we will aarrange something different for them." Restated:
+  each Guest Count of kind counts the Party's children under 6; no Dish is made for kind; a Dish's
+  number leaves kind out; kind still counts among who a Party brings. The change narrows what kind
+  means and adds assertions 13 and 17, with 12 and 14 rewritten: no new entity, attribute or value.
+- **Servies** (the members, 2026-11-20). Mariska: "can you add a ssecond set of tiles for Servies
+  ... Only photos and text no calculations", taken the way a dish is taken. Restated: each Tableware
+  Item is brought along by one Party, and records no people. A Dish without Guest Categories does not
+  fit: it would be made for everyone and counted. The kind of tableware is not wanted either, as the
+  family names each lot in its text. So Tableware Item is a new entity, an individual, with
+  assertions 9, 10 and 15.
 
 Open questions: none.
 
@@ -308,9 +384,11 @@ Open questions: none.
 ### Access
 
 - **Backend:** household endpoints carry the template's `@public` attribute, which the OIDC hook
-  already skips. Each request carries the household's link token in a header. The token is 128 random
-  bits, URL-safe, and stored on the Party. An unknown or replaced token is refused.
-- **Admin endpoints:** they require the admin role (`@allow_roles("admin")`).
+  already skips. Each request carries the household's link token in the `X-Link-Token` header. The
+  token is 128 random bits, URL-safe, and stored on the Party. A missing header answers `400`, and an
+  unknown or replaced token `401`, "Gebruik de persoonlijke link uit je e-mail".
+- **Admin endpoints:** they require the admin role (`@allow_roles("admin")`): the backend's auth
+  service has `admin` as its admin role, so a signed-in caller without it gets `403`.
 - **Frontend:** a route marks itself public with an attribute on its route definition (TanStack
   Router's `staticData: { public: true }`). The login gate and the 401-to-login redirect skip every
   route that carries it. `/` and `/p/$token` carry it, and `/admin` doesn't. This changes
@@ -322,16 +400,24 @@ Open questions: none.
 
 | Endpoint | Caller | What it does |
 |---|---|---|
-| `GET /api/party` | link | The household, its answer and its four counts |
-| `PUT /api/party/answer` | link | Saves *komt / komt niet* and the counts; declining releases the household's dishes |
-| `GET /api/dishes` | link | Every dish: name, photo, people (kids apart), who makes it, whether that is you |
-| `PUT /api/dishes/{id}/claim` | link | Takes the dish; `409` if another household has it; no change if you already have it |
-| `DELETE /api/dishes/{id}/claim` | link | Gives the dish back; `409` if another household has it |
-| `GET /api/admin/parties` | admin | Every household with its answer, counts, time answered and link, plus totals |
+| `GET /api/party` | link | The household, its answer, its four counts and everyone it brings, the young children included |
+| `PUT /api/party/answer` | link | Saves *komt* with the counts (at least one person), or *komt niet*; declining zeroes the counts and releases the household's dishes and servies |
+| `GET /api/dishes` | link | Every dish: name, photo, people (vegan, vegetarisch and eet alles, as it is made for them), who makes it, and its status for you: `free`, `yours` or `taken` |
+| `PUT /api/dishes/{id}/claim` | link | Takes the dish; `409` if another household has it, or if you have not said you come; no change if you already have it |
+| `DELETE /api/dishes/{id}/claim` | link | Gives the dish back; `409` if another household has it; no change if nobody has it |
+| `GET /api/tableware` | link | Every servies item: text, photo, who brings it, and its status for you |
+| `PUT /api/tableware/{id}/claim` | link | Takes the item, as a dish is taken |
+| `DELETE /api/tableware/{id}/claim` | link | Gives the item back, as a dish is given back |
+| `GET /api/admin/parties` | admin | Every household with its answer, counts, time answered and link token, plus the totals, guesses included |
 | `POST /api/admin/parties/{id}/link` | admin | Replaces the household's link |
+| `POST /api/testing/reset` | testing mode only | Wipes every household, dish, servies item and report, applies the config in the body (the YAML's shape, as JSON), and answers the new link tokens |
+
+A lost race answers `409` with the code `CLAIMED_BY_OTHER` and the household page's text: "Dit
+gerecht is net door Familie Jansen gekozen", or "Dit servies is net door Familie Jansen gekozen". The
+claim locks the dish's row, so two clicks at once take turns and the second gets the `409`.
 
 Readiness covers two systems. The database check comes from the template and is critical. The bridge
-gets a non-critical check on its `/healthz`.
+gets a non-critical check on its `/healthz`, registered when the bridge is configured.
 
 ## Deployment
 
@@ -354,12 +440,14 @@ gets a non-critical check on its `/healthz`.
   - the config sync and the reset;
   - the answer and claim rules, including the race and declining;
   - the admin endpoints;
-  - the report queue, against the approved stand-in for the bridge.
+  - the report queue, against the approved stand-in for the bridge: a small fake of its
+    `/v1/submit` and `/healthz` in `backend/tests/support/`, served over HTTP on a free port, which
+    records what it was sent and can be told to fail.
 - **Playwright:**
   - The household page: answering, taking, releasing, a lost race and declining.
   - The admin page: the table, copying a link and replacing one.
   - Public routes rendering without a login.
-  - A testing endpoint resets the state.
+  - A testing endpoint, `POST /api/testing/reset`, resets the state.
 
 ## Out of scope
 

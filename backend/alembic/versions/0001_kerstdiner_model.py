@@ -2,9 +2,10 @@
 report queue and config state beside it.
 
 Adds the entities of docs/design.md's Data model: Party with its Guest Counts
-(assertions 1, 2, 9), Dish with the Guest Categories it is made for (7, 10)
-and the Party that makes it (5, 6), and Tableware Item with the Party that
-brings it. The four Guest Categories are a checked string, fixed in code.
+(assertions 1, 2, 11), Dish with the Guest Categories it is made for (7, 12,
+13) and the Party that makes it (5, 6), and Tableware Item with the Party that
+brings it along (9, 10). The four Guest Categories are a checked string, fixed
+in code.
 
 Revision ID: 0001
 Revises:
