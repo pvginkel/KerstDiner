@@ -1,14 +1,169 @@
 /**
- * App-specific theme overrides.
+ * KerstDiner's Christmas theme: red, green and gold, a festive heading font,
+ * falling snow and twinkling fairy lights. The whole site, the household page
+ * and /admin, is drawn in it.
  * App-owned — not overwritten by template updates.
  *
- * Override CSS custom properties defined in index.css to set brand colors.
- * Add app-specific utilities with @utility directives.
- *
- * Example:
- *   @layer base {
- *     :root {
- *       --primary: 200 80% 50%;
- *     }
- *   }
+ * - The tokens below override index.css's, in light and dark mode alike: the
+ *   site has one look.
+ * - Utilities: font-festive (headings), gold-foil (gold heading text),
+ *   gold-frame (the cards' gold border) and the snow and twinkle animations.
+ * - The decorations themselves are React components in src/components/kerst/.
+ * - Fonts and their licences live in src/assets/fonts/ and are bundled by Vite.
  */
+
+/* Mountains of Christmas, Apache License 2.0 (assets/fonts/LICENSE-mountains-of-christmas.txt) */
+@font-face {
+  font-family: 'Mountains of Christmas';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/mountains-of-christmas-700.woff2') format('woff2');
+}
+
+/* Nunito, SIL Open Font License 1.1 (assets/fonts/OFL-nunito.txt) */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('../assets/fonts/nunito-variable.woff2') format('woff2');
+}
+
+@theme {
+  --font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+  --font-festive: 'Mountains of Christmas', Georgia, serif;
+
+  --color-kerst-red: hsl(352 82% 40%);
+  --color-kerst-red-dark: hsl(350 80% 26%);
+  --color-kerst-green: hsl(152 70% 22%);
+  --color-kerst-pine: hsl(155 70% 11%);
+  --color-kerst-gold: hsl(43 74% 49%);
+  --color-kerst-gold-light: hsl(45 90% 72%);
+  --color-kerst-gold-dark: hsl(38 80% 32%);
+  --color-kerst-cream: hsl(40 70% 97%);
+  --color-kerst-snow: hsl(200 40% 98%);
+  --color-kerst-ink: hsl(150 30% 12%);
+
+  --animate-snowfall: snowfall 12s linear infinite;
+  --animate-twinkle: twinkle 2.6s ease-in-out infinite;
+
+  @keyframes snowfall {
+    from {
+      transform: translate3d(0, -10vh, 0) rotate(0deg);
+    }
+    to {
+      transform: translate3d(var(--snow-drift, 3rem), 110vh, 0) rotate(240deg);
+    }
+  }
+
+  @keyframes twinkle {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+
+    --background: 155 70% 11%;
+    --foreground: 40 70% 96%;
+    --card: 40 70% 97%;
+    --card-foreground: 150 30% 12%;
+    --popover: 40 70% 97%;
+    --popover-foreground: 150 30% 12%;
+    --primary: 352 82% 40%;
+    --primary-foreground: 40 100% 98%;
+    --secondary: 152 70% 22%;
+    --secondary-foreground: 40 100% 98%;
+    --muted: 40 45% 90%;
+    --muted-foreground: 150 14% 30%;
+    --accent: 45 90% 72%;
+    --accent-foreground: 150 30% 12%;
+    --destructive: 0 75% 42%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 43 60% 62%;
+    --input: 43 45% 70%;
+    --ring: 43 90% 50%;
+    --radius: 1rem;
+    --link: 352 82% 40%;
+    --link-hover: 350 80% 30%;
+
+    --success: 152 60% 30%;
+    --success-foreground: 152 70% 8%;
+    --warning: 43 80% 40%;
+    --warning-foreground: 43 70% 10%;
+    --info: 200 70% 40%;
+    --info-foreground: 200 70% 10%;
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.15);
+    --shadow-md: 0 4px 10px -2px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 12px 24px -6px rgb(0 0 0 / 0.45);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.5;
+  }
+}
+
+/* The headings' font. */
+@utility font-festive {
+  font-family: var(--font-festive);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+}
+
+/* Gold leaf for festive text on the dark green background. */
+@utility gold-foil {
+  background-image: linear-gradient(
+    180deg,
+    hsl(48 100% 88%) 0%,
+    hsl(45 92% 68%) 35%,
+    hsl(42 78% 48%) 65%,
+    hsl(45 90% 70%) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 0 hsl(155 80% 5% / 0.8));
+}
+
+/* A card's gold frame: a gold line, a cream gap and a second gold line. */
+@utility gold-frame {
+  border: 3px solid var(--color-kerst-gold);
+  box-shadow:
+    inset 0 0 0 3px var(--color-kerst-cream),
+    inset 0 0 0 4px hsl(43 74% 49% / 0.6),
+    0 10px 24px -8px rgb(0 0 0 / 0.55);
+}
+
+/* The page's night sky: deep pine green with gold and white stars. */
+@utility festive-backdrop {
+  background-color: var(--color-kerst-pine);
+  background-image:
+    radial-gradient(circle at 18% 22%, hsl(45 95% 75% / 0.7) 0 1.2px, transparent 2px),
+    radial-gradient(circle at 72% 64%, hsl(45 95% 75% / 0.5) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 44% 86%, hsl(0 0% 100% / 0.45) 0 1px, transparent 1.8px),
+    radial-gradient(ellipse 100% 40rem at 50% 0%, hsl(152 55% 22%) 0%, transparent 75%);
+  background-size: 150px 150px, 210px 210px, 120px 120px, 100% 100%;
+  background-attachment: local;
+}
+
+/* Snow and lights stand still for whoever asks for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-snowfall {
+    animation: none;
+    display: none;
+  }
+  .animate-twinkle {
+    animation: none;
+  }
+}

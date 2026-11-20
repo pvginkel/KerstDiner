@@ -13,6 +13,7 @@
     "check:type-check": "tsc -b --noEmit",
     "check:knip": "knip --no-config-hints",
     "preview": "vite preview --port 3700",
+    "screenshots:preview": "node scripts/preview-screenshots.js",
     "generate:routes": "tsr generate",
     "generate:api": "node scripts/generate-api.js --fetch",
     "generate:api:build": "node scripts/generate-api.js --cache-only",

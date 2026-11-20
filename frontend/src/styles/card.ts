@@ -1,6 +1,6 @@
 /** Card variant class maps — app-owned, customizable per project. */
 
-export const cardBaseClasses = 'rounded-lg border bg-card text-card-foreground shadow-sm';
+export const cardBaseClasses = 'rounded-2xl border-2 border-kerst-gold bg-card text-card-foreground shadow-md';
 
 export const cardVariantClasses = {
   default: 'p-6',

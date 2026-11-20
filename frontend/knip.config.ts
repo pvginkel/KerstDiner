@@ -13,6 +13,8 @@ const templateIgnore: string[] = JSON.parse(
 const config: KnipConfig = {
   entry: [
     'src/routes/**/*.tsx',
+    // The style's preview, which only the dev server serves (preview.html).
+    'src/preview/main.tsx',
     'tests/**/*.spec.ts',
     'tests/support/fixtures.ts',
   ],
