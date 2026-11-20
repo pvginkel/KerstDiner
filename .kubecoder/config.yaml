@@ -11,15 +11,8 @@
 # databases on the same server (TEST_DATABASE_ADMIN_URL) and never touch the
 # dev one.
 #
-# No imageBuilder: both Dockerfiles are built by Jenkins with
-# helmCharts.kaniko2(...), and nothing builds an image from inside this
-# environment.
-
-repos:
-  # The AI workflow's spec repository, shared across every environment that
-  # works on KerstDiner.
-  - url: https://github.com/pvginkel/KerstDinerSpecs
-    shared: true
+# No `repos:`: KerstDiner takes no AI-workflow onboarding, so it has no spec
+# repository (the template's KerstDinerSpecs entry is dropped).
 
 capabilities:
   github: rw
@@ -32,6 +25,12 @@ tools:
 
 services:
   - postgres
+
+# Proves backend/Dockerfile and frontend/Dockerfile with the `kaniko` client
+# (`kaniko --no-push`, run from the Dockerfile's directory) before a push hands
+# them to Jenkins, which builds them with helmCharts.kaniko2(...). Neither is
+# wired into a build: verb.
+imageBuilder: true
 
 ports:
   - name: frontend
