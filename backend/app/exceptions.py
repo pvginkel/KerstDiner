@@ -79,3 +79,14 @@ class ValidationException(BusinessLogicException):
 
     def __init__(self, message: str) -> None:
         super().__init__(message, error_code="VALIDATION_FAILED")
+
+
+class ClaimTakenException(ResourceConflictException):
+    """Raised when another household already makes the dish or brings the servies.
+
+    Its message is the household page's own, in Dutch, naming that household:
+    "Dit gerecht is net door Familie Jansen gekozen".
+    """
+
+    def __init__(self, message: str) -> None:
+        BusinessLogicException.__init__(self, message, error_code="CLAIMED_BY_OTHER")

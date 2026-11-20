@@ -1,6 +1,245 @@
 {
   "components": {
     "schemas": {
+      "AdminPartiesResponse.3b8afed": {
+        "description": "Every household in config order, and the totals the dish tiles use.",
+        "properties": {
+          "parties": {
+            "description": "Every household, in config order",
+            "items": {
+              "$ref": "#/components/schemas/AdminPartiesResponse.3b8afed.AdminPartyResponse"
+            },
+            "title": "Parties",
+            "type": "array"
+          },
+          "people": {
+            "description": "Everyone who comes, the young children included",
+            "title": "People",
+            "type": "integer"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/AdminPartiesResponse.3b8afed.GuestCountsSchema",
+            "description": "Who every household brings, the guesses of those yet to answer included"
+          }
+        },
+        "required": [
+          "parties",
+          "totals",
+          "people"
+        ],
+        "title": "AdminPartiesResponse",
+        "type": "object"
+      },
+      "AdminPartiesResponse.3b8afed.AdminPartyResponse": {
+        "description": "A household as /admin sees it, with its link.",
+        "properties": {
+          "answer": {
+            "description": "Its answer, or unanswered",
+            "enum": [
+              "unanswered",
+              "coming",
+              "not_coming"
+            ],
+            "title": "Answer",
+            "type": "string"
+          },
+          "answered_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When it last changed its answer",
+            "title": "Answered At"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/AdminPartiesResponse.3b8afed.GuestCountsSchema",
+            "description": "Who it brings: the operator's guess until it answers"
+          },
+          "id": {
+            "description": "The household's id",
+            "title": "Id",
+            "type": "integer"
+          },
+          "link_token": {
+            "description": "Its link token: the link is /p/<link_token>",
+            "title": "Link Token",
+            "type": "string"
+          },
+          "name": {
+            "description": "Its name, such as Familie Jansen",
+            "title": "Name",
+            "type": "string"
+          },
+          "people": {
+            "description": "Everyone it brings, the young children included",
+            "title": "People",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "answer",
+          "counts",
+          "people",
+          "answered_at",
+          "link_token"
+        ],
+        "title": "AdminPartyResponse",
+        "type": "object"
+      },
+      "AdminPartiesResponse.3b8afed.GuestCountsSchema": {
+        "additionalProperties": false,
+        "description": "How many people of each Guest Category a household brings.",
+        "properties": {
+          "kind": {
+            "description": "Kindermenu <6jr: children under 6",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Kind",
+            "type": "integer"
+          },
+          "normaal": {
+            "description": "Eet alles",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Normaal",
+            "type": "integer"
+          },
+          "vegan": {
+            "description": "Vegan",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Vegan",
+            "type": "integer"
+          },
+          "vegetarisch": {
+            "description": "Vegetarisch",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Vegetarisch",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "vegan",
+          "vegetarisch",
+          "normaal",
+          "kind"
+        ],
+        "title": "GuestCountsSchema",
+        "type": "object"
+      },
+      "AdminPartyResponse.3b8afed": {
+        "description": "A household as /admin sees it, with its link.",
+        "properties": {
+          "answer": {
+            "description": "Its answer, or unanswered",
+            "enum": [
+              "unanswered",
+              "coming",
+              "not_coming"
+            ],
+            "title": "Answer",
+            "type": "string"
+          },
+          "answered_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When it last changed its answer",
+            "title": "Answered At"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/AdminPartyResponse.3b8afed.GuestCountsSchema",
+            "description": "Who it brings: the operator's guess until it answers"
+          },
+          "id": {
+            "description": "The household's id",
+            "title": "Id",
+            "type": "integer"
+          },
+          "link_token": {
+            "description": "Its link token: the link is /p/<link_token>",
+            "title": "Link Token",
+            "type": "string"
+          },
+          "name": {
+            "description": "Its name, such as Familie Jansen",
+            "title": "Name",
+            "type": "string"
+          },
+          "people": {
+            "description": "Everyone it brings, the young children included",
+            "title": "People",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "answer",
+          "counts",
+          "people",
+          "answered_at",
+          "link_token"
+        ],
+        "title": "AdminPartyResponse",
+        "type": "object"
+      },
+      "AdminPartyResponse.3b8afed.GuestCountsSchema": {
+        "additionalProperties": false,
+        "description": "How many people of each Guest Category a household brings.",
+        "properties": {
+          "kind": {
+            "description": "Kindermenu <6jr: children under 6",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Kind",
+            "type": "integer"
+          },
+          "normaal": {
+            "description": "Eet alles",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Normaal",
+            "type": "integer"
+          },
+          "vegan": {
+            "description": "Vegan",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Vegan",
+            "type": "integer"
+          },
+          "vegetarisch": {
+            "description": "Vegetarisch",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Vegetarisch",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "vegan",
+          "vegetarisch",
+          "normaal",
+          "kind"
+        ],
+        "title": "GuestCountsSchema",
+        "type": "object"
+      },
       "ApiErrorResponseSchema.c2a0d71": {
         "description": "The error envelope every error handler answers with.\n\nIt mirrors ``build_error_response()`` in ``app/utils/flask_error_handlers.py``;\nchange both together. Use it to document error responses in ``@api.validate``,\nfor example ``HTTP_502=ApiErrorResponseSchema`` on an endpoint that calls an\nexternal service. One handler differs: a ``pydantic.ValidationError`` raised\nin a handler answers 400 with ``details.errors``, a list of\n``{\"message\", \"field\"}``, instead of ``details.message``.",
         "properties": {
@@ -64,6 +303,152 @@
         "title": "ApiErrorDetailsSchema",
         "type": "object"
       },
+      "DishListResponse.3d8d65b": {
+        "description": "Every dish, in config order.",
+        "properties": {
+          "dishes": {
+            "description": "Every dish, in config order",
+            "items": {
+              "$ref": "#/components/schemas/DishListResponse.3d8d65b.DishResponse"
+            },
+            "title": "Dishes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "dishes"
+        ],
+        "title": "DishListResponse",
+        "type": "object"
+      },
+      "DishListResponse.3d8d65b.DishResponse": {
+        "description": "A dish tile.",
+        "properties": {
+          "id": {
+            "description": "The dish's id",
+            "title": "Id",
+            "type": "integer"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Its photo's file name under /gerechten/, or null for the placeholder",
+            "title": "Image"
+          },
+          "made_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the household that makes it",
+            "title": "Made By"
+          },
+          "name": {
+            "description": "Its name, such as Pompoensoep",
+            "title": "Name",
+            "type": "string"
+          },
+          "people": {
+            "description": "How many it is for: vegan, vegetarisch and eet alles as it is made for them",
+            "title": "People",
+            "type": "integer"
+          },
+          "status": {
+            "description": "free, yours, or taken by another household",
+            "enum": [
+              "free",
+              "yours",
+              "taken"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "image",
+          "people",
+          "status",
+          "made_by"
+        ],
+        "title": "DishResponse",
+        "type": "object"
+      },
+      "DishResponse.3d8d65b": {
+        "description": "A dish tile.",
+        "properties": {
+          "id": {
+            "description": "The dish's id",
+            "title": "Id",
+            "type": "integer"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Its photo's file name under /gerechten/, or null for the placeholder",
+            "title": "Image"
+          },
+          "made_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the household that makes it",
+            "title": "Made By"
+          },
+          "name": {
+            "description": "Its name, such as Pompoensoep",
+            "title": "Name",
+            "type": "string"
+          },
+          "people": {
+            "description": "How many it is for: vegan, vegetarisch and eet alles as it is made for them",
+            "title": "People",
+            "type": "integer"
+          },
+          "status": {
+            "description": "free, yours, or taken by another household",
+            "enum": [
+              "free",
+              "yours",
+              "taken"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "image",
+          "people",
+          "status",
+          "made_by"
+        ],
+        "title": "DishResponse",
+        "type": "object"
+      },
       "ForceErrorQuerySchema.e510e64": {
         "description": "Query parameters for force-error endpoint.",
         "properties": {
@@ -106,6 +491,409 @@
           "ready"
         ],
         "title": "HealthResponse",
+        "type": "object"
+      },
+      "KerstDinerConfig.036ef7d": {
+        "additionalProperties": false,
+        "description": "The whole config file.",
+        "properties": {
+          "dishes": {
+            "items": {
+              "$ref": "#/components/schemas/KerstDinerConfig.036ef7d.DishConfig"
+            },
+            "title": "Dishes",
+            "type": "array"
+          },
+          "households": {
+            "items": {
+              "$ref": "#/components/schemas/KerstDinerConfig.036ef7d.HouseholdConfig"
+            },
+            "title": "Households",
+            "type": "array"
+          },
+          "reset": {
+            "default": 0,
+            "description": "Raise it to wipe every answer, claim and link on the next deploy",
+            "minimum": 0,
+            "title": "Reset",
+            "type": "integer"
+          },
+          "servies": {
+            "items": {
+              "$ref": "#/components/schemas/KerstDinerConfig.036ef7d.TablewareConfig"
+            },
+            "title": "Servies",
+            "type": "array"
+          }
+        },
+        "title": "KerstDinerConfig",
+        "type": "object"
+      },
+      "KerstDinerConfig.036ef7d.DishConfig": {
+        "additionalProperties": false,
+        "description": "A dish as the config gives it; without ``for`` it is made for all three groups.",
+        "properties": {
+          "for": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/KerstDinerConfig.036ef7d.GuestCategory"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "vegan, vegetarisch and normaal at most; left out, all three",
+            "title": "For"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "description": "A photo's file name, without a directory",
+                "maxLength": 200,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Image"
+          },
+          "key": {
+            "description": "Never changes: lower case letters, digits and dashes",
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Key",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "name"
+        ],
+        "title": "DishConfig",
+        "type": "object"
+      },
+      "KerstDinerConfig.036ef7d.GuessConfig": {
+        "additionalProperties": false,
+        "description": "The operator's guess of who a household brings; a category left out is 0.",
+        "properties": {
+          "kind": {
+            "default": 0,
+            "description": "Children under 6: a kindermenu",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Kind",
+            "type": "integer"
+          },
+          "normaal": {
+            "default": 0,
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Normaal",
+            "type": "integer"
+          },
+          "vegan": {
+            "default": 0,
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Vegan",
+            "type": "integer"
+          },
+          "vegetarisch": {
+            "default": 0,
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Vegetarisch",
+            "type": "integer"
+          }
+        },
+        "title": "GuessConfig",
+        "type": "object"
+      },
+      "KerstDinerConfig.036ef7d.GuestCategory": {
+        "description": "A kind of guest the dinner caters for.\n\n``kind`` is a child under 6, who gets a kindermenu that the family arranges\napart: no Dish is made for it. An older child counts as vegan,\nvegetarisch or normaal, as an adult does.",
+        "enum": [
+          "vegan",
+          "vegetarisch",
+          "normaal",
+          "kind"
+        ],
+        "title": "GuestCategory",
+        "type": "string"
+      },
+      "KerstDinerConfig.036ef7d.HouseholdConfig": {
+        "additionalProperties": false,
+        "description": "A household (a Party) as the config gives it.",
+        "properties": {
+          "guess": {
+            "$ref": "#/components/schemas/KerstDinerConfig.036ef7d.GuessConfig"
+          },
+          "key": {
+            "description": "Never changes: lower case letters, digits and dashes",
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Key",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "name"
+        ],
+        "title": "HouseholdConfig",
+        "type": "object"
+      },
+      "KerstDinerConfig.036ef7d.TablewareConfig": {
+        "additionalProperties": false,
+        "description": "A servies item (a Tableware Item) as the config gives it.",
+        "properties": {
+          "image": {
+            "anyOf": [
+              {
+                "description": "A photo's file name, without a directory",
+                "maxLength": 200,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Image"
+          },
+          "key": {
+            "description": "Never changes: lower case letters, digits and dashes",
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Key",
+            "type": "string"
+          },
+          "text": {
+            "description": "What it is, such as \"20 borden\"",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "text"
+        ],
+        "title": "TablewareConfig",
+        "type": "object"
+      },
+      "LinkTokenHeaders.3b8afed": {
+        "additionalProperties": true,
+        "description": "The household's link token, from its link ``/p/<token>``.",
+        "properties": {
+          "X-Link-Token": {
+            "description": "The household's link token, from its link /p/<token>",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "X-Link-Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "X-Link-Token"
+        ],
+        "title": "LinkTokenHeaders",
+        "type": "object"
+      },
+      "PartyAnswerRequest.3b8afed": {
+        "additionalProperties": false,
+        "description": "A household's answer: coming with who it brings, or not coming.",
+        "properties": {
+          "answer": {
+            "description": "komt or komt niet",
+            "enum": [
+              "coming",
+              "not_coming"
+            ],
+            "title": "Answer",
+            "type": "string"
+          },
+          "counts": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PartyAnswerRequest.3b8afed.GuestCountsSchema"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Who it brings; required when coming, ignored when not"
+          }
+        },
+        "required": [
+          "answer"
+        ],
+        "title": "PartyAnswerRequest",
+        "type": "object"
+      },
+      "PartyAnswerRequest.3b8afed.GuestCountsSchema": {
+        "additionalProperties": false,
+        "description": "How many people of each Guest Category a household brings.",
+        "properties": {
+          "kind": {
+            "description": "Kindermenu <6jr: children under 6",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Kind",
+            "type": "integer"
+          },
+          "normaal": {
+            "description": "Eet alles",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Normaal",
+            "type": "integer"
+          },
+          "vegan": {
+            "description": "Vegan",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Vegan",
+            "type": "integer"
+          },
+          "vegetarisch": {
+            "description": "Vegetarisch",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Vegetarisch",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "vegan",
+          "vegetarisch",
+          "normaal",
+          "kind"
+        ],
+        "title": "GuestCountsSchema",
+        "type": "object"
+      },
+      "PartyResponse.3b8afed": {
+        "description": "A household as it sees itself.",
+        "properties": {
+          "answer": {
+            "description": "Its answer, or unanswered",
+            "enum": [
+              "unanswered",
+              "coming",
+              "not_coming"
+            ],
+            "title": "Answer",
+            "type": "string"
+          },
+          "answered_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When it last changed its answer",
+            "title": "Answered At"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/PartyResponse.3b8afed.GuestCountsSchema",
+            "description": "Who it brings: the operator's guess until it answers"
+          },
+          "id": {
+            "description": "The household's id",
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Its name, such as Familie Jansen",
+            "title": "Name",
+            "type": "string"
+          },
+          "people": {
+            "description": "Everyone it brings, the young children included",
+            "title": "People",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "answer",
+          "counts",
+          "people",
+          "answered_at"
+        ],
+        "title": "PartyResponse",
+        "type": "object"
+      },
+      "PartyResponse.3b8afed.GuestCountsSchema": {
+        "additionalProperties": false,
+        "description": "How many people of each Guest Category a household brings.",
+        "properties": {
+          "kind": {
+            "description": "Kindermenu <6jr: children under 6",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Kind",
+            "type": "integer"
+          },
+          "normaal": {
+            "description": "Eet alles",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Normaal",
+            "type": "integer"
+          },
+          "vegan": {
+            "description": "Vegan",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Vegan",
+            "type": "integer"
+          },
+          "vegetarisch": {
+            "description": "Vegetarisch",
+            "maximum": 99,
+            "minimum": 0,
+            "title": "Vegetarisch",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "vegan",
+          "vegetarisch",
+          "normaal",
+          "kind"
+        ],
+        "title": "GuestCountsSchema",
         "type": "object"
       },
       "ReadyzResponse.d817ae2": {
@@ -196,6 +984,140 @@
           "critical"
         ],
         "title": "ReadinessCheckSchema",
+        "type": "object"
+      },
+      "TablewareListResponse.3d8d65b": {
+        "description": "Every servies item, in config order.",
+        "properties": {
+          "items": {
+            "description": "Every servies item, in config order",
+            "items": {
+              "$ref": "#/components/schemas/TablewareListResponse.3d8d65b.TablewareResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "TablewareListResponse",
+        "type": "object"
+      },
+      "TablewareListResponse.3d8d65b.TablewareResponse": {
+        "description": "A servies tile.",
+        "properties": {
+          "brought_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the household that brings it",
+            "title": "Brought By"
+          },
+          "id": {
+            "description": "The item's id",
+            "title": "Id",
+            "type": "integer"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Its photo's file name under /servies/, or null for the placeholder",
+            "title": "Image"
+          },
+          "status": {
+            "description": "free, yours, or taken by another household",
+            "enum": [
+              "free",
+              "yours",
+              "taken"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "text": {
+            "description": "What it is, such as \"20 borden\"",
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "image",
+          "status",
+          "brought_by"
+        ],
+        "title": "TablewareResponse",
+        "type": "object"
+      },
+      "TablewareResponse.3d8d65b": {
+        "description": "A servies tile.",
+        "properties": {
+          "brought_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the household that brings it",
+            "title": "Brought By"
+          },
+          "id": {
+            "description": "The item's id",
+            "title": "Id",
+            "type": "integer"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Its photo's file name under /servies/, or null for the placeholder",
+            "title": "Image"
+          },
+          "status": {
+            "description": "free, yours, or taken by another household",
+            "enum": [
+              "free",
+              "yours",
+              "taken"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "text": {
+            "description": "What it is, such as \"20 borden\"",
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "image",
+          "status",
+          "brought_by"
+        ],
+        "title": "TablewareResponse",
         "type": "object"
       },
       "TaskActionResponse.70db092": {
@@ -411,6 +1333,90 @@
         "title": "TestSessionResponseSchema",
         "type": "object"
       },
+      "TestingResetResponse.d40c6ff": {
+        "description": "What the reset created, in config order.",
+        "properties": {
+          "dishes": {
+            "description": "Every dish",
+            "items": {
+              "$ref": "#/components/schemas/TestingResetResponse.d40c6ff.ResetItemResponse"
+            },
+            "title": "Dishes",
+            "type": "array"
+          },
+          "parties": {
+            "description": "Every household",
+            "items": {
+              "$ref": "#/components/schemas/TestingResetResponse.d40c6ff.ResetPartyResponse"
+            },
+            "title": "Parties",
+            "type": "array"
+          },
+          "servies": {
+            "description": "Every servies item",
+            "items": {
+              "$ref": "#/components/schemas/TestingResetResponse.d40c6ff.ResetItemResponse"
+            },
+            "title": "Servies",
+            "type": "array"
+          }
+        },
+        "required": [
+          "parties",
+          "dishes",
+          "servies"
+        ],
+        "title": "TestingResetResponse",
+        "type": "object"
+      },
+      "TestingResetResponse.d40c6ff.ResetItemResponse": {
+        "description": "A dish or servies item the reset created.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key"
+        ],
+        "title": "ResetItemResponse",
+        "type": "object"
+      },
+      "TestingResetResponse.d40c6ff.ResetPartyResponse": {
+        "description": "A household the reset created, with its link token.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "link_token": {
+            "title": "Link Token",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "link_token"
+        ],
+        "title": "ResetPartyResponse",
+        "type": "object"
+      },
       "UiSetupResponseSchema.630d3b9": {
         "description": "What the frontend needs to know about the deployment it runs against.",
         "properties": {
@@ -558,6 +1564,141 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/admin/parties": {
+      "get": {
+        "description": "",
+        "operationId": "get__api_admin_parties",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPartiesResponse.3b8afed"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError.6a07bef"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Every household with its answer, counts, time answered and link, plus the totals.",
+        "tags": [],
+        "x-required-role": "admin"
+      }
+    },
+    "/api/admin/parties/{party_id}/link": {
+      "post": {
+        "description": "",
+        "operationId": "post__api_admin_parties_{party_id}_link",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "party_id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPartyResponse.3b8afed"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError.6a07bef"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Replace the household's link; the old one stops working.",
+        "tags": [],
+        "x-required-role": "admin"
+      }
+    },
     "/api/auth/callback": {
       "get": {
         "description": "Exchanges authorization code for tokens and sets access token cookie.\n\nQuery Parameters:     code: Authorization code from OIDC provider     state: CSRF token from OIDC provider\n\nReturns:     302: Redirect to original redirect URL with access token cookie set     400: Invalid or missing callback parameters     401: Token exchange failed",
@@ -619,6 +1760,572 @@
         "tags": []
       }
     },
+    "/api/dishes": {
+      "get": {
+        "description": "",
+        "operationId": "get__api_dishes",
+        "parameters": [
+          {
+            "description": "The household's link token, from its link /p/<token>",
+            "in": "header",
+            "name": "X-Link-Token",
+            "required": true,
+            "schema": {
+              "description": "The household's link token, from its link /p/<token>",
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "X-Link-Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DishListResponse.3d8d65b"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Every dish: name, photo, how many it is for, and who makes it.",
+        "tags": []
+      }
+    },
+    "/api/dishes/{dish_id}/claim": {
+      "delete": {
+        "description": "",
+        "operationId": "delete__api_dishes_{dish_id}_claim",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "dish_id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "The household's link token, from its link /p/<token>",
+            "in": "header",
+            "name": "X-Link-Token",
+            "required": true,
+            "schema": {
+              "description": "The household's link token, from its link /p/<token>",
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "X-Link-Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DishResponse.3d8d65b"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Conflict"
+          }
+        },
+        "summary": "Give the dish back: 409 when another household makes it.",
+        "tags": []
+      },
+      "put": {
+        "description": "",
+        "operationId": "put__api_dishes_{dish_id}_claim",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "dish_id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "The household's link token, from its link /p/<token>",
+            "in": "header",
+            "name": "X-Link-Token",
+            "required": true,
+            "schema": {
+              "description": "The household's link token, from its link /p/<token>",
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "X-Link-Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DishResponse.3d8d65b"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Conflict"
+          }
+        },
+        "summary": "Take the dish: 409 when another household makes it, or this one has not said it comes.",
+        "tags": []
+      }
+    },
+    "/api/party": {
+      "get": {
+        "description": "",
+        "operationId": "get__api_party",
+        "parameters": [
+          {
+            "description": "The household's link token, from its link /p/<token>",
+            "in": "header",
+            "name": "X-Link-Token",
+            "required": true,
+            "schema": {
+              "description": "The household's link token, from its link /p/<token>",
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "X-Link-Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyResponse.3b8afed"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "The household, its answer and who it brings.",
+        "tags": []
+      }
+    },
+    "/api/party/answer": {
+      "put": {
+        "description": "",
+        "operationId": "put__api_party_answer",
+        "parameters": [
+          {
+            "description": "The household's link token, from its link /p/<token>",
+            "in": "header",
+            "name": "X-Link-Token",
+            "required": true,
+            "schema": {
+              "description": "The household's link token, from its link /p/<token>",
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "X-Link-Token",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyAnswerRequest.3b8afed"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyResponse.3b8afed"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Save komt with who comes, or komt niet; declining releases the household's dishes and servies.",
+        "tags": []
+      }
+    },
+    "/api/tableware": {
+      "get": {
+        "description": "",
+        "operationId": "get__api_tableware",
+        "parameters": [
+          {
+            "description": "The household's link token, from its link /p/<token>",
+            "in": "header",
+            "name": "X-Link-Token",
+            "required": true,
+            "schema": {
+              "description": "The household's link token, from its link /p/<token>",
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "X-Link-Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TablewareListResponse.3d8d65b"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Every servies item: text, photo, and who brings it.",
+        "tags": []
+      }
+    },
+    "/api/tableware/{item_id}/claim": {
+      "delete": {
+        "description": "",
+        "operationId": "delete__api_tableware_{item_id}_claim",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "The household's link token, from its link /p/<token>",
+            "in": "header",
+            "name": "X-Link-Token",
+            "required": true,
+            "schema": {
+              "description": "The household's link token, from its link /p/<token>",
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "X-Link-Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TablewareResponse.3d8d65b"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Conflict"
+          }
+        },
+        "summary": "Give the item back: 409 when another household brings it.",
+        "tags": []
+      },
+      "put": {
+        "description": "",
+        "operationId": "put__api_tableware_{item_id}_claim",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "The household's link token, from its link /p/<token>",
+            "in": "header",
+            "name": "X-Link-Token",
+            "required": true,
+            "schema": {
+              "description": "The household's link token, from its link /p/<token>",
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "X-Link-Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TablewareResponse.3d8d65b"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Conflict"
+          }
+        },
+        "summary": "Take the item: 409 when another household brings it, or this one has not said it comes.",
+        "tags": []
+      }
+    },
     "/api/tasks/{task_id}": {
       "delete": {
         "description": "",
@@ -666,8 +2373,14 @@
             "description": "Not Found"
           }
         },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "summary": "Remove a completed task from registry.",
-        "tags": []
+        "tags": [],
+        "x-required-role": "admin"
       }
     },
     "/api/tasks/{task_id}/cancel": {
@@ -717,8 +2430,14 @@
             "description": "Not Found"
           }
         },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "summary": "Cancel a running task.",
-        "tags": []
+        "tags": [],
+        "x-required-role": "admin"
       }
     },
     "/api/tasks/{task_id}/status": {
@@ -842,6 +2561,47 @@
           }
         },
         "summary": "Create an authenticated test session, bypassing the real OIDC flow.",
+        "tags": []
+      }
+    },
+    "/api/testing/reset": {
+      "post": {
+        "description": "The body has the config file's shape, as JSON. Every household gets a new link token, which the answer carries.",
+        "operationId": "post__api_testing_reset",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KerstDinerConfig.036ef7d"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestingResetResponse.d40c6ff"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponseSchema.c2a0d71"
+                }
+              }
+            },
+            "description": "Bad Request"
+          }
+        },
+        "summary": "Wipe every household, dish, servies item and report, and apply the config given.",
         "tags": []
       }
     },
@@ -1003,7 +2763,7 @@
   "security": [],
   "tags": [],
   "x-auth-roles": {
-    "admin": null,
+    "admin": "admin",
     "hierarchy": {},
     "read": null,
     "write": null

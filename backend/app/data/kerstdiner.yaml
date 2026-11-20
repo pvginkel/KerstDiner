@@ -1,0 +1,62 @@
+# KerstDiner's households, dishes and servies (docs/design.md, "The config file").
+# Every deploy syncs this file into the database.
+#
+# THIS IS TEST DATA, for the operator's test in production. The one reset
+# replaces it with the real households, dishes and servies.
+
+reset: 1    # raise to wipe every answer, claim and link on the next deploy
+
+# A household's guess counts vegan, vegetarisch, normaal (eet alles) and kind
+# (kindermenu <6jr: only children under 6; older children count as adults do).
+# A category left out is 0.
+households:
+  - key: jansen
+    name: Familie Jansen
+    guess: {vegetarisch: 1, normaal: 2, kind: 2}
+  - key: oma-opa
+    name: Oma en opa
+    guess: {normaal: 2}
+  - key: tante-els
+    name: Tante Els
+    guess: {vegan: 1}
+  - key: de-boer
+    name: Familie de Boer
+    guess: {normaal: 2, kind: 1}
+  - key: wij
+    name: Wij
+    guess: {normaal: 2}
+
+# A dish is made for vegan, vegetarisch and normaal at most; without "for", for
+# all three. No dish is made for the kindermenu. "image" is a file in
+# frontend/public/gerechten/; without one the tile shows a placeholder.
+dishes:
+  - key: soep
+    name: Pompoensoep
+  - key: groenten
+    name: Geroosterde groenten
+  - key: rollade
+    name: Rollade
+    for: [normaal]
+  - key: wellington
+    name: Linzen-wellington
+    for: [vegan, vegetarisch]
+  - key: gratin
+    name: Aardappelgratin
+    for: [vegetarisch, normaal]
+  - key: salade
+    name: Wintersalade
+  - key: tiramisu
+    name: Tiramisu
+    for: [vegetarisch, normaal]
+
+# Servies: "text" is what the tile says. "image" is a file in
+# frontend/public/servies/; without one the tile shows a placeholder.
+servies:
+  - key: borden
+    text: 20 borden
+  - key: wijnglazen
+    text: 20 wijnglazen
+  - key: bestek
+    text: 20 setjes bestek
+  - key: schalen
+    text: 4 serveerschalen
