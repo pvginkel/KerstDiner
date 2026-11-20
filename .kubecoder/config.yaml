@@ -11,17 +11,25 @@
 # databases on the same server (TEST_DATABASE_ADMIN_URL) and never touch the
 # dev one.
 #
-# No `repos:`: KerstDiner takes no AI-workflow onboarding, so it has no spec
-# repository (the template's KerstDinerSpecs entry is dropped).
+# KerstDiner takes no AI-workflow onboarding, so it has no spec repository (the
+# template's KerstDinerSpecs entry is dropped).
 
 capabilities:
   github: rw
 
+repos:
+  # The Argo CD deploy repository the Jenkinsfile pins images into
+  # (cicd.writeVersionPins); its project.yaml runs through iac and aac-tools.
+  - url: https://github.com/pvginkel/KerstDinerDeploy
+
 tools:
   - use: modern-app
   # arch-validate, for the architecture model's lint step (project.yaml); the
-  # AaC/KerstDiner job runs the same command.
+  # AaC/KerstDiner job runs the same command. chart-deps, for the deploy repo's
+  # verbs.
   - use: aac-tools
+  # helm and terraform, for the deploy repo's verbs.
+  - use: iac
 
 services:
   - postgres
