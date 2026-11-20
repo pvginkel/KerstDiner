@@ -5,7 +5,11 @@ The change writes its message to ``change_reports`` in its own transaction
 messages through the notification bridge in order, marking each one sent. A
 failed send stays queued and is tried again a minute later, so a household's
 click never waits on Telegram or fails because of it, and no report is lost.
-The backend runs as one replica, so one thread sends.
+The backend runs as one replica, but a rollout's surge runs a second beside it,
+and each pod's thread sends. So a sender locks the report it takes
+(``FOR UPDATE``): the other sender waits on that row, neither sending it again
+nor one after it, and goes on once it is sent, or tries it itself when the
+send failed. Each report goes out once, in id order.
 """
 
 import logging
@@ -97,6 +101,9 @@ class ReportSender:
                     .where(ChangeReport.sent_at.is_(None))
                     .order_by(ChangeReport.id)
                     .limit(1)
+                    # Locked until the commit: another sender waits here, and
+                    # skipping the locked row instead would send out of order.
+                    .with_for_update()
                 ).first()
                 if report is None:
                     return True

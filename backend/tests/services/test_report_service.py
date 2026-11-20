@@ -3,11 +3,12 @@
 import threading
 import time
 from collections.abc import Callable, Generator
+from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 from dependency_injector import providers
 from flask import Flask, g
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import Settings
@@ -143,6 +144,21 @@ def _sent_messages(session_maker: sessionmaker[Session]) -> list[str]:
 
 def _delivered(bridge: FakeNotificationBridge) -> list[str]:
     return [submit.body["message"] for submit in bridge.submits]
+
+
+def _attempted(bridge: FakeNotificationBridge) -> list[str]:
+    return [submit.body["message"] for submit in bridge.attempts]
+
+
+def _lock_waits(session_maker: sessionmaker[Session]) -> int:
+    """How many connections to the test's database wait on a lock."""
+    with session_maker() as session:
+        return session.scalar(
+            text(
+                "SELECT count(*) FROM pg_stat_activity "
+                "WHERE datname = current_database() AND wait_event_type = 'Lock'"
+            )
+        )
 
 
 class TestReportSender:
@@ -571,6 +587,99 @@ class TestReportSender:
         assert _sent_messages(session_maker) == []
         sender.wake()
         _wait_for(lambda: _delivered(bridge) == ["stays"], "the report")
+
+
+class TestTwoSenders:
+    """Two senders on one queue, as a rollout's surge runs two pods."""
+
+    @pytest.fixture
+    def two_senders(
+        self,
+        committed_app: Flask,
+        bridge_client: NotificationBridgeClient,
+        make_sender: Callable[..., ReportSender],
+    ) -> tuple[ReportSender, ReportSender]:
+        container = committed_app.container
+        return (
+            make_sender(
+                container.session_maker(),
+                bridge_client,
+                container.lifecycle_coordinator(),
+            ),
+            make_sender(
+                container.session_maker(),
+                bridge_client,
+                container.lifecycle_coordinator(),
+            ),
+        )
+
+    def _second_sender_meets_the_first(
+        self,
+        session_maker: sessionmaker[Session],
+        bridge: FakeNotificationBridge,
+    ) -> None:
+        """Wait until the second sender waits on the first's lock or sends too."""
+        _wait_for(
+            lambda: _lock_waits(session_maker) > 0 or len(bridge.attempts) > 1,
+            "the second sender",
+        )
+
+    def test_each_report_goes_out_once_and_in_order(
+        self,
+        committed_app: Flask,
+        bridge: FakeNotificationBridge,
+        two_senders: tuple[ReportSender, ReportSender],
+    ) -> None:
+        session_maker = committed_app.container.session_maker()
+        _commit(session_maker, "one", "two", "three")
+        first, second = two_senders
+        release = bridge.hold_next()
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            first_round = pool.submit(first.send_pending)
+            _wait_for(lambda: len(bridge.attempts) == 1, "the first sender's send")
+            second_round = pool.submit(second.send_pending)
+            self._second_sender_meets_the_first(session_maker, bridge)
+
+            # While "one" is in flight, the second sender sends neither it
+            # nor a report after it.
+            assert _attempted(bridge) == ["one"]
+            release.set()
+
+            assert first_round.result(timeout=15) is True
+            assert second_round.result(timeout=15) is True
+
+        assert _attempted(bridge) == ["one", "two", "three"]
+        assert _delivered(bridge) == ["one", "two", "three"]
+        assert _sent_messages(session_maker) == ["one", "two", "three"]
+
+    def test_a_failed_send_holds_the_later_reports_and_the_other_sender_retries(
+        self,
+        committed_app: Flask,
+        bridge: FakeNotificationBridge,
+        two_senders: tuple[ReportSender, ReportSender],
+    ) -> None:
+        session_maker = committed_app.container.session_maker()
+        _commit(session_maker, "one", "two", "three")
+        first, second = two_senders
+        bridge.fail_next(1)
+        release = bridge.hold_next()
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            first_round = pool.submit(first.send_pending)
+            _wait_for(lambda: len(bridge.attempts) == 1, "the first sender's send")
+            second_round = pool.submit(second.send_pending)
+            self._second_sender_meets_the_first(session_maker, bridge)
+
+            assert _attempted(bridge) == ["one"]
+            release.set()
+
+            assert first_round.result(timeout=15) is False
+            assert second_round.result(timeout=15) is True
+
+        assert _attempted(bridge) == ["one", "one", "two", "three"]
+        assert _delivered(bridge) == ["one", "two", "three"]
+        assert _sent_messages(session_maker) == ["one", "two", "three"]
 
 
 class TestReportQueue:

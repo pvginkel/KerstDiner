@@ -8,7 +8,8 @@ or a blank message, a ``413`` over 4096 characters, a ``404`` or ``405`` for
 another path or method, ``GET /healthz`` without a token) and answering the
 per-channel result of a registration that has Telegram only.
 
-It records what it accepted, and a test scripts how the next submits fail.
+It records what it accepted, and a test scripts how the next submits fail and
+holds one unanswered, to have a send in flight.
 """
 
 import json
@@ -42,6 +43,8 @@ Failure = Literal[
 _FIELDS = {"message", "title", "priority", "sequence_id", "url"}
 _PRIORITIES = {"min", "low", "default", "high", "max"}
 _MAX_MESSAGE = 4096
+_HOLD_SECONDS = 15
+"""The longest a held submit waits for its release, so no test hangs on one."""
 
 
 @dataclass(frozen=True)
@@ -70,6 +73,8 @@ class FakeNotificationBridge:
     def __init__(self) -> None:
         self._lock = threading.Lock()
         self._failures: list[Failure] = []
+        self._holds: list[threading.Event] = []
+        self._released: list[threading.Event] = []
         self._healthy = True
         self._submits: list[Submit] = []
         self._attempts: list[Submit] = []
@@ -108,12 +113,27 @@ class FakeNotificationBridge:
         with self._lock:
             self._failures.extend([how] * count)
 
+    def hold_next(self) -> threading.Event:
+        """Hold the next valid submit unanswered until the returned event is set.
+
+        The held submit counts among ``attempts`` at once, and among
+        ``submits`` once it is answered, unless a scripted failure answers it.
+        """
+        release = threading.Event()
+        with self._lock:
+            self._holds.append(release)
+            self._released.append(release)
+        return release
+
     def set_healthy(self, healthy: bool) -> None:
         """Have ``/healthz`` answer 200 (healthy) or 503."""
         with self._lock:
             self._healthy = healthy
 
     def close(self) -> None:
+        with self._lock:
+            for release in self._released:
+                release.set()
         self._server.shutdown()
         self._server.server_close()
         self._thread.join()
@@ -171,8 +191,14 @@ class FakeNotificationBridge:
         with self._lock:
             self._attempts.append(accepted)
             failure = self._failures.pop(0) if self._failures else None
-            if failure is None:
+            hold = self._holds.pop(0) if self._holds else None
+            if failure is None and hold is None:
                 self._submits.append(accepted)
+        if hold is not None:
+            hold.wait(_HOLD_SECONDS)
+            if failure is None:
+                with self._lock:
+                    self._submits.append(accepted)
 
         if failure is None:
             return _json({"telegram": "ok"})

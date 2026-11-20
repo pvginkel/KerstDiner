@@ -177,7 +177,9 @@ How a message is sent:
 - **Queued with the change:** the change writes its message to a queue table in the same
   transaction.
 - **Sent in the background:** a background thread in the backend sends queued messages in order and
-  marks each one sent.
+  marks each one sent. The backend runs as one replica, but a rollout briefly runs two, each with its
+  thread. A thread locks the message it is sending, so the other waits on it: each message goes out
+  once, and none before an earlier one.
 - **Where it goes:** each message goes to the notification bridge under a `kerstdiner` registration
   (`POST /v1/submit`, the *Open* button its `url`, `BASEURL` + `/admin`). That registration has one
   Telegram chat: a group you create, add the bot to, and share. A send counts as failed unless the
@@ -189,7 +191,7 @@ How a message is sent:
 - **Failures:** a failed send stays queued and is tried again a minute later.
 
 This way a household's click never waits on Telegram or fails because of it, and no report is lost.
-The queue is plumbing: it is not part of the data model. The backend runs as one replica.
+The queue is plumbing: it is not part of the data model.
 
 Replacing a link, and a reset, are not reported.
 
