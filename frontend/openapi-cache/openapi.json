@@ -707,19 +707,23 @@
       },
       "LinkTokenHeaders.3b8afed": {
         "additionalProperties": true,
-        "description": "The household's link token, from its link ``/p/<token>``.",
+        "description": "The household's link token, from its link ``/p/<token>``.\n\nOptional in the OpenAPI document, so that the generated client's hooks,\nwhich pass no headers, type-check: the frontend adds it to every request\nof the household page. A request without it answers 401, as one with an\nunknown token does.",
         "properties": {
           "X-Link-Token": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
             "description": "The household's link token, from its link /p/<token>",
-            "maxLength": 64,
-            "minLength": 1,
-            "title": "X-Link-Token",
-            "type": "string"
+            "title": "X-Link-Token"
           }
         },
-        "required": [
-          "X-Link-Token"
-        ],
         "title": "LinkTokenHeaders",
         "type": "object"
       },
@@ -1769,13 +1773,20 @@
             "description": "The household's link token, from its link /p/<token>",
             "in": "header",
             "name": "X-Link-Token",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
               "description": "The household's link token, from its link /p/<token>",
-              "maxLength": 64,
-              "minLength": 1,
-              "title": "X-Link-Token",
-              "type": "string"
+              "title": "X-Link-Token"
             }
           }
         ],
@@ -1834,13 +1845,20 @@
             "description": "The household's link token, from its link /p/<token>",
             "in": "header",
             "name": "X-Link-Token",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
               "description": "The household's link token, from its link /p/<token>",
-              "maxLength": 64,
-              "minLength": 1,
-              "title": "X-Link-Token",
-              "type": "string"
+              "title": "X-Link-Token"
             }
           }
         ],
@@ -1917,13 +1935,20 @@
             "description": "The household's link token, from its link /p/<token>",
             "in": "header",
             "name": "X-Link-Token",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
               "description": "The household's link token, from its link /p/<token>",
-              "maxLength": 64,
-              "minLength": 1,
-              "title": "X-Link-Token",
-              "type": "string"
+              "title": "X-Link-Token"
             }
           }
         ],
@@ -1992,13 +2017,20 @@
             "description": "The household's link token, from its link /p/<token>",
             "in": "header",
             "name": "X-Link-Token",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
               "description": "The household's link token, from its link /p/<token>",
-              "maxLength": 64,
-              "minLength": 1,
-              "title": "X-Link-Token",
-              "type": "string"
+              "title": "X-Link-Token"
             }
           }
         ],
@@ -2047,13 +2079,20 @@
             "description": "The household's link token, from its link /p/<token>",
             "in": "header",
             "name": "X-Link-Token",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
               "description": "The household's link token, from its link /p/<token>",
-              "maxLength": 64,
-              "minLength": 1,
-              "title": "X-Link-Token",
-              "type": "string"
+              "title": "X-Link-Token"
             }
           }
         ],
@@ -2112,13 +2151,20 @@
             "description": "The household's link token, from its link /p/<token>",
             "in": "header",
             "name": "X-Link-Token",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
               "description": "The household's link token, from its link /p/<token>",
-              "maxLength": 64,
-              "minLength": 1,
-              "title": "X-Link-Token",
-              "type": "string"
+              "title": "X-Link-Token"
             }
           }
         ],
@@ -2177,13 +2223,20 @@
             "description": "The household's link token, from its link /p/<token>",
             "in": "header",
             "name": "X-Link-Token",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
               "description": "The household's link token, from its link /p/<token>",
-              "maxLength": 64,
-              "minLength": 1,
-              "title": "X-Link-Token",
-              "type": "string"
+              "title": "X-Link-Token"
             }
           }
         ],
@@ -2260,13 +2313,20 @@
             "description": "The household's link token, from its link /p/<token>",
             "in": "header",
             "name": "X-Link-Token",
-            "required": true,
+            "required": false,
             "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
               "description": "The household's link token, from its link /p/<token>",
-              "maxLength": 64,
-              "minLength": 1,
-              "title": "X-Link-Token",
-              "type": "string"
+              "title": "X-Link-Token"
             }
           }
         ],

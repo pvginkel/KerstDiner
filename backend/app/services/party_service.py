@@ -63,12 +63,16 @@ class PartyService:
         """The Party whose link carries ``link_token``.
 
         Raises:
-            AuthenticationException: No Party has that token: it is unknown or
-                has been replaced.
+            AuthenticationException: The token is empty, or no Party has it:
+                it is unknown or has been replaced.
         """
-        party = self.db_session.scalars(
-            select(Party).where(Party.link_token == link_token)
-        ).first()
+        party = (
+            self.db_session.scalars(
+                select(Party).where(Party.link_token == link_token)
+            ).first()
+            if link_token
+            else None
+        )
         if party is None:
             raise AuthenticationException(UNKNOWN_LINK_MESSAGE)
         return party

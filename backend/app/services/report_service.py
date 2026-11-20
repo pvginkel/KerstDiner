@@ -63,7 +63,7 @@ class ReportSender:
         if not self._bridge_client.is_configured:
             if self._settings.is_production:
                 raise ConfigurationError(
-                    "NOTIFICATION_BRIDGE_URL and NOTIFICATION_BRIDGE_TOKEN must be set "
+                    "NOTIFICATIONS_URL and NOTIFICATIONS_TOKEN must be set "
                     "in production: without them no change report is sent"
                 )
             logger.warning(

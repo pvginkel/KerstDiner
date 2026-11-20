@@ -18,13 +18,19 @@ People = Annotated[int, Field(ge=0, le=99)]
 
 
 class LinkTokenHeaders(BaseModel):
-    """The household's link token, from its link ``/p/<token>``."""
+    """The household's link token, from its link ``/p/<token>``.
+
+    Optional in the OpenAPI document, so that the generated client's hooks,
+    which pass no headers, type-check: the frontend adds it to every request
+    of the household page. A request without it answers 401, as one with an
+    unknown token does.
+    """
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
-    link_token: str = Field(
+    link_token: str | None = Field(
+        default=None,
         alias="X-Link-Token",
-        min_length=1,
         max_length=64,
         description="The household's link token, from its link /p/<token>",
     )

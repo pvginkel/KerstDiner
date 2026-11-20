@@ -182,8 +182,8 @@ How a message is sent:
   (`POST /v1/submit`, the *Open* button its `url`, `BASEURL` + `/admin`). That registration has one
   Telegram chat: a group you create, add the bot to, and share. A send counts as failed unless the
   bridge answers that Telegram took it.
-- **Its configuration:** the deploy sets `NOTIFICATION_BRIDGE_URL` (the bridge's in-cluster address,
-  port 8090) and `NOTIFICATION_BRIDGE_TOKEN` (the registration's bearer token, a secret). Under
+- **Its configuration:** the deploy sets `NOTIFICATIONS_URL` (the bridge's in-cluster address,
+  port 8090) and `NOTIFICATIONS_TOKEN` (the registration's bearer token, a secret). Under
   `FLASK_ENV=production` the backend refuses to start without them; elsewhere the messages stay
   queued.
 - **Failures:** a failed send stays queued and is tried again a minute later.
@@ -385,8 +385,10 @@ Open questions: none.
 
 - **Backend:** household endpoints carry the template's `@public` attribute, which the OIDC hook
   already skips. Each request carries the household's link token in the `X-Link-Token` header. The
-  token is 128 random bits, URL-safe, and stored on the Party. A missing header answers `400`, and an
-  unknown or replaced token `401`, "Gebruik de persoonlijke link uit je e-mail".
+  token is 128 random bits, URL-safe, and stored on the Party. A missing header, or an unknown or
+  replaced token, answers `401`, "Gebruik de persoonlijke link uit je e-mail". The OpenAPI document
+  marks the header optional, because the generated client's hooks pass no headers: the household
+  page adds it to each of its requests.
 - **Admin endpoints:** they require the admin role (`@allow_roles("admin")`): the backend's auth
   service has `admin` as its admin role, so a signed-in caller without it gets `403`.
 - **Frontend:** a route marks itself public with an attribute on its route definition (TanStack

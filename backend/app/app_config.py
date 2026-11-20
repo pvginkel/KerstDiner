@@ -25,7 +25,7 @@ class AppEnvironment(BaseSettings):
         extra="ignore",
     )
 
-    NOTIFICATION_BRIDGE_URL: str = Field(
+    NOTIFICATIONS_URL: str = Field(
         default="",
         description=(
             "The notification bridge's base URL, such as "
@@ -33,7 +33,7 @@ class AppEnvironment(BaseSettings):
             "and the change reports stay queued (refused under FLASK_ENV=production)"
         ),
     )
-    NOTIFICATION_BRIDGE_TOKEN: str = Field(
+    NOTIFICATIONS_TOKEN: str = Field(
         default="",
         description="The bearer token of the bridge's kerstdiner registration",
     )
@@ -63,6 +63,6 @@ class AppSettings(BaseModel):
         if env is None:
             env = AppEnvironment()
         return cls(
-            notification_bridge_url=env.NOTIFICATION_BRIDGE_URL,
-            notification_bridge_token=env.NOTIFICATION_BRIDGE_TOKEN,
+            notification_bridge_url=env.NOTIFICATIONS_URL,
+            notification_bridge_token=env.NOTIFICATIONS_TOKEN,
         )
