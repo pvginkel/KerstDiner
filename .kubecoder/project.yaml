@@ -1,12 +1,14 @@
-# `setup` runs `uv sync`, not `uv sync --locked`: a freshly generated app has
-# no uv.lock until the first setup writes it. Commit both locks (root and
-# backend/); CI, the suite runner and the Dockerfile sync `--locked`.
+# The three lockfiles (uv.lock, backend/uv.lock, frontend/pnpm-lock.yaml) were
+# written once, at onboarding, and are committed, so `setup` syncs `--locked`
+# and `--frozen-lockfile` as CI, the suite runner and the Dockerfiles do: a lock
+# out of step with its manifest fails setup rather than being rewritten in the
+# tree.
 projects:
   root:
     description: >-
       KerstDiner monorepo — orchestration tooling (the suite runner), the
       shared Procfile.dev dev stack, and CI.
-    setup: cexec modern-app uv sync
+    setup: cexec modern-app uv sync --locked
     # The root's own Python, and the architecture model; backend/ and frontend/
     # lint themselves.
     lint:
@@ -29,7 +31,7 @@ projects:
     description: >-
       The family's Christmas dinner of 25 December 2026: who comes, and who brings which dish and servies — Flask backend.
     setup:
-      - cexec modern-app uv sync
+      - cexec modern-app uv sync --locked
       - "test -f .env || printf 'DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/kerstdiner\\n' > .env"
       - cexec modern-app uv run python scripts/init-dev-database.py
       - cexec modern-app uv run cli upgrade-db
