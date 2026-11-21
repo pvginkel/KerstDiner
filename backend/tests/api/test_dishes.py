@@ -16,7 +16,7 @@ UNKNOWN_LINK_MESSAGE = "Gebruik de persoonlijke link uit je e-mail"
 
 def _reports(session: Session) -> list[str]:
     return [
-        r.message
+        f"{r.party.name}: {r.message}"
         for r in session.scalars(select(ChangeReport).order_by(ChangeReport.id))
     ]
 
@@ -169,7 +169,7 @@ class TestDishesApi:
             "status": "yours",
             "made_by": "Familie Jansen",
         }
-        assert _reports(session)[-1] == "Familie Jansen maakt Pompoensoep."
+        assert _reports(session)[-1] == "Familie Jansen: Maakt Pompoensoep."
 
     def test_claim_of_a_dish_you_have_changes_nothing(
         self,
@@ -283,7 +283,7 @@ class TestDishesApi:
         assert body["id"] == soep_id
         assert body["status"] == "free"
         assert body["made_by"] is None
-        assert _reports(session)[-1] == "Familie Jansen maakt Pompoensoep toch niet."
+        assert _reports(session)[-1] == "Familie Jansen: Maakt Pompoensoep toch niet."
 
     def test_release_of_a_dish_nobody_makes_changes_nothing(
         self,

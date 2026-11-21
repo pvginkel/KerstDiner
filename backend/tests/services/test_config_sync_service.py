@@ -846,7 +846,13 @@ class TestConfigSyncServiceReplaceAll:
         container.party_service().save_answer(
             _party(session, "jansen"), PartyAnswer.COMING, {GuestCategory.NORMAAL: 1}
         )
-        session.add(ChangeReport(message="al verstuurd", sent_at=func.now()))
+        session.add(
+            ChangeReport(
+                party_id=_party(session, "jansen").id,
+                message="Al verstuurd.",
+                sent_at=func.now(),
+            )
+        )
         session.flush()
         assert _count(session, ChangeReport) >= 2
 

@@ -57,14 +57,20 @@ class NotificationBridgeClient:
             )
         return CheckResult(CheckStatus.OK)
 
-    def submit(self, message: str, url: str | None = None) -> None:
+    def submit(
+        self, message: str, title: str | None = None, url: str | None = None
+    ) -> None:
         """Send ``message`` (Markdown) to the registration's Telegram chat.
+
+        Telegram shows ``title``, plain text, in bold above the message.
 
         Raises:
             ExternalServiceException: The bridge did not answer, refused the
                 submit, or Telegram did not take the message.
         """
         body: dict[str, Any] = {"message": message}
+        if title is not None:
+            body["title"] = title
         if url is not None:
             body["url"] = url
         try:

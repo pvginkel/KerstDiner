@@ -145,7 +145,7 @@ class TestNotificationBridgeClient:
     def test_submit_sends_the_message_and_url_under_the_bearer_token(
         self, bridge: FakeNotificationBridge, bridge_client: NotificationBridgeClient
     ) -> None:
-        bridge_client.submit("Familie Jansen *komt*", "https://kerst.example/admin")
+        bridge_client.submit("Familie Jansen *komt*", url="https://kerst.example/admin")
 
         assert len(bridge.submits) == 1
         submit = bridge.submits[0]
@@ -161,6 +161,18 @@ class TestNotificationBridgeClient:
         bridge_client.submit("hello")
 
         assert bridge.submits[0].body == {"message": "hello"}
+
+    def test_submit_sends_the_title_when_given_and_leaves_it_out_otherwise(
+        self, bridge: FakeNotificationBridge, bridge_client: NotificationBridgeClient
+    ) -> None:
+        bridge_client.submit("- Komt niet.", title="Familie Jansen")
+        bridge_client.submit("- Komt niet.")
+
+        assert bridge.submits[0].body == {
+            "message": "- Komt niet.",
+            "title": "Familie Jansen",
+        }
+        assert "title" not in bridge.submits[1].body
 
     def test_submit_tolerates_a_trailing_slash_in_the_base_url(
         self, bridge: FakeNotificationBridge, health_service: HealthService

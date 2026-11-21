@@ -72,7 +72,7 @@ class DishService:
                 )
             dish.made_by_id = party.id
             self.db_session.flush()
-            self._report_queue.queue(dish_taken_report(party, dish))
+            self._report_queue.queue(party, dish_taken_report(dish))
         return self._view(dish, party, category_totals(self.db_session))
 
     def release(self, party: Party, dish_id: int) -> DishView:
@@ -90,7 +90,7 @@ class DishService:
                 )
             dish.made_by_id = None
             self.db_session.flush()
-            self._report_queue.queue(dish_released_report(party, dish))
+            self._report_queue.queue(party, dish_released_report(dish))
         return self._view(dish, party, category_totals(self.db_session))
 
     def _lock(self, dish_id: int) -> Dish:

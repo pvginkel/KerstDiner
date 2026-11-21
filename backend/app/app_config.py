@@ -37,6 +37,14 @@ class AppEnvironment(BaseSettings):
         default="",
         description="The bearer token of the bridge's kerstdiner registration",
     )
+    REPORT_BATCH_SECONDS: float = Field(
+        default=300,
+        ge=0,
+        description=(
+            "How long a household's timer runs: its changes go to Telegram in one "
+            "message once this many seconds pass without another change"
+        ),
+    )
 
 
 class AppSettings(BaseModel):
@@ -50,6 +58,7 @@ class AppSettings(BaseModel):
 
     notification_bridge_url: str = ""
     notification_bridge_token: Annotated[str, Sensitive] = ""
+    report_batch_seconds: float = 300
 
     def dump_for_logging(self) -> dict[str, str]:
         """Every setting, for the boot log, with the Sensitive ones as ``***``."""
@@ -65,4 +74,5 @@ class AppSettings(BaseModel):
         return cls(
             notification_bridge_url=env.NOTIFICATIONS_URL,
             notification_bridge_token=env.NOTIFICATIONS_TOKEN,
+            report_batch_seconds=env.REPORT_BATCH_SECONDS,
         )

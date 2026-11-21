@@ -23,7 +23,7 @@ NORMAAL = GuestCategory.NORMAAL
 
 def _reports(session: Session) -> list[str]:
     return [
-        report.message
+        f"{report.party.name}: {report.message}"
         for report in session.scalars(select(ChangeReport).order_by(ChangeReport.id))
     ]
 
@@ -144,7 +144,7 @@ class TestTablewareService:
     ):
         tableware_service.claim(jansen, borden.id)
 
-        assert _reports(session)[-1] == "Familie Jansen neemt 20 borden mee."
+        assert _reports(session)[-1] == "Familie Jansen: Neemt 20 borden mee."
         assert len(_reports(session)) == 2  # The answer's report and this one.
 
     def test_claim_of_an_item_you_have_changes_nothing(
@@ -264,8 +264,8 @@ class TestTablewareService:
         tableware_service.release(jansen, borden.id)
 
         assert _reports(session)[-2:] == [
-            "Familie Jansen neemt 20 borden mee.",
-            "Familie Jansen neemt 20 borden toch niet mee.",
+            "Familie Jansen: Neemt 20 borden mee.",
+            "Familie Jansen: Neemt 20 borden toch niet mee.",
         ]
 
     def test_release_of_an_item_nobody_brings_changes_nothing(

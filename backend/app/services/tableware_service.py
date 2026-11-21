@@ -64,7 +64,7 @@ class TablewareService:
                 )
             item.brought_by_id = party.id
             self.db_session.flush()
-            self._report_queue.queue(tableware_taken_report(party, item))
+            self._report_queue.queue(party, tableware_taken_report(item))
         return self._view(item, party)
 
     def release(self, party: Party, item_id: int) -> TablewareView:
@@ -82,7 +82,7 @@ class TablewareService:
                 )
             item.brought_by_id = None
             self.db_session.flush()
-            self._report_queue.queue(tableware_released_report(party, item))
+            self._report_queue.queue(party, tableware_released_report(item))
         return self._view(item, party)
 
     def _lock(self, item_id: int) -> TablewareItem:

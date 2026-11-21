@@ -30,7 +30,7 @@ KIND = GuestCategory.KIND
 
 def _reports(session: Session) -> list[str]:
     return [
-        report.message
+        f"{report.party.name}: {report.message}"
         for report in session.scalars(select(ChangeReport).order_by(ChangeReport.id))
     ]
 
@@ -121,7 +121,7 @@ class TestPartyService:
         )
 
         assert _reports(session) == [
-            "Familie Jansen komt met 5: 1 vegetarisch, 2 eet alles, 2 kindermenu's."
+            "Familie Jansen: Komt met 5: 1 vegetarisch, 2 eet alles, 2 kindermenu's."
         ]
 
     def test_save_answer_with_the_guess_is_still_a_change_from_unanswered(
@@ -131,7 +131,7 @@ class TestPartyService:
 
         assert de_boer.answer == PartyAnswer.COMING
         assert de_boer.answered_at is not None
-        assert _reports(session) == ["Familie de Boer komt met 2: 2 eet alles."]
+        assert _reports(session) == ["Familie de Boer: Komt met 2: 2 eet alles."]
 
     def test_save_answer_persists(
         self, party_service: PartyService, session: Session, els: Party
@@ -179,8 +179,8 @@ class TestPartyService:
         assert jansen.answered_at is not None
         assert jansen.answered_at >= first
         assert _reports(session) == [
-            "Familie Jansen komt met 2: 2 eet alles.",
-            "Familie Jansen komt met 4: 3 eet alles, 1 kindermenu.",
+            "Familie Jansen: Komt met 2: 2 eet alles.",
+            "Familie Jansen: Komt met 4: 3 eet alles, 1 kindermenu.",
         ]
 
     def test_save_answer_not_coming_zeroes_every_count(
@@ -191,7 +191,7 @@ class TestPartyService:
         assert jansen.answer == PartyAnswer.NOT_COMING
         assert _counts(jansen) == {VEGAN: 0, VEGETARISCH: 0, NORMAAL: 0, KIND: 0}
         assert jansen.answered_at is not None
-        assert _reports(session) == ["Familie Jansen komt niet."]
+        assert _reports(session) == ["Familie Jansen: Komt niet."]
 
     def test_save_answer_not_coming_twice_changes_nothing(
         self, party_service: PartyService, session: Session, jansen: Party
@@ -202,7 +202,7 @@ class TestPartyService:
         party_service.save_answer(jansen, PartyAnswer.NOT_COMING, {})
 
         assert jansen.answered_at == answered_at
-        assert _reports(session) == ["Familie Jansen komt niet."]
+        assert _reports(session) == ["Familie Jansen: Komt niet."]
 
     def test_save_answer_not_coming_after_coming_queues_one_more_report(
         self, party_service: PartyService, session: Session, jansen: Party
@@ -211,8 +211,8 @@ class TestPartyService:
         party_service.save_answer(jansen, PartyAnswer.NOT_COMING, {})
 
         assert _reports(session) == [
-            "Familie Jansen komt met 2: 2 eet alles.",
-            "Familie Jansen komt niet.",
+            "Familie Jansen: Komt met 2: 2 eet alles.",
+            "Familie Jansen: Komt niet.",
         ]
 
     def test_save_answer_coming_after_not_coming(
@@ -224,7 +224,7 @@ class TestPartyService:
 
         assert jansen.answer == PartyAnswer.COMING
         assert _counts(jansen) == {VEGAN: 1, VEGETARISCH: 0, NORMAAL: 0, KIND: 0}
-        assert _reports(session)[-1] == "Familie Jansen komt met 1: 1 vegan."
+        assert _reports(session)[-1] == "Familie Jansen: Komt met 1: 1 vegan."
 
     def test_save_answer_not_coming_releases_dishes_and_servies(
         self,
@@ -274,8 +274,8 @@ class TestPartyService:
         party_service.save_answer(jansen, PartyAnswer.NOT_COMING, {})
 
         assert _reports(session) == [
-            "Familie Jansen komt met 2: 2 eet alles.",
-            "Familie Jansen komt niet.",
+            "Familie Jansen: Komt met 2: 2 eet alles.",
+            "Familie Jansen: Komt niet.",
         ]
 
     def test_save_answer_coming_keeps_the_claims(

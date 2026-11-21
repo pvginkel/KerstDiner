@@ -114,7 +114,7 @@ class PartyService:
             party.set_people(category, people)
         party.answered_at = datetime.now(UTC)
         self.db_session.flush()
-        self._report_queue.queue(attendance_report(party))
+        self._report_queue.queue(party, attendance_report(party))
         return party
 
     def list_parties(self) -> list[Party]:

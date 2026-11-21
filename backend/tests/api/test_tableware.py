@@ -14,7 +14,7 @@ UNKNOWN_LINK_MESSAGE = "Gebruik de persoonlijke link uit je e-mail"
 
 def _reports(session: Session) -> list[str]:
     return [
-        r.message
+        f"{r.party.name}: {r.message}"
         for r in session.scalars(select(ChangeReport).order_by(ChangeReport.id))
     ]
 
@@ -144,7 +144,7 @@ class TestTablewareApi:
             "status": "yours",
             "brought_by": "Familie Jansen",
         }
-        assert _reports(session)[-1] == "Familie Jansen neemt 20 borden mee."
+        assert _reports(session)[-1] == "Familie Jansen: Neemt 20 borden mee."
 
     def test_claim_of_an_item_you_have_changes_nothing(
         self,
@@ -262,7 +262,7 @@ class TestTablewareApi:
         assert body["id"] == borden_id
         assert body["status"] == "free"
         assert body["brought_by"] is None
-        assert _reports(session)[-1] == "Familie Jansen neemt 20 borden toch niet mee."
+        assert _reports(session)[-1] == "Familie Jansen: Neemt 20 borden toch niet mee."
 
     def test_release_of_an_item_nobody_brings_changes_nothing(
         self,

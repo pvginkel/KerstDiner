@@ -32,7 +32,7 @@ KIND = GuestCategory.KIND
 
 def _reports(session: Session) -> list[str]:
     return [
-        report.message
+        f"{report.party.name}: {report.message}"
         for report in session.scalars(select(ChangeReport).order_by(ChangeReport.id))
     ]
 
@@ -220,7 +220,7 @@ class TestDishService:
     ):
         dish_service.claim(jansen, soep.id)
 
-        assert _reports(session)[-1] == "Familie Jansen maakt Pompoensoep."
+        assert _reports(session)[-1] == "Familie Jansen: Maakt Pompoensoep."
         assert len(_reports(session)) == 2  # The answer's report and this one.
 
     def test_claim_of_a_dish_you_have_changes_nothing(
@@ -345,8 +345,8 @@ class TestDishService:
         dish_service.release(jansen, soep.id)
 
         assert _reports(session)[-2:] == [
-            "Familie Jansen maakt Pompoensoep.",
-            "Familie Jansen maakt Pompoensoep toch niet.",
+            "Familie Jansen: Maakt Pompoensoep.",
+            "Familie Jansen: Maakt Pompoensoep toch niet.",
         ]
 
     def test_release_of_a_dish_nobody_makes_changes_nothing(
@@ -498,9 +498,9 @@ class TestDishServiceRace:
         assert dish is not None
         assert dish.made_by_id == household_a
         messages = [
-            r.message
+            f"{r.party.name}: {r.message}"
             for r in observer.scalars(select(ChangeReport).order_by(ChangeReport.id))
         ]
-        assert messages.count("Familie Jansen maakt Pompoensoep.") == 1
-        assert not any("de Boer maakt" in m for m in messages)
+        assert messages.count("Familie Jansen: Maakt Pompoensoep.") == 1
+        assert not any("de Boer: Maakt" in m for m in messages)
         observer.close()

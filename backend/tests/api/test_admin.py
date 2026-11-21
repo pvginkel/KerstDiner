@@ -14,7 +14,7 @@ from tests.conftest import link_headers
 
 def _reports(session: Session) -> list[str]:
     return [
-        r.message
+        f"{r.party.name}: {r.message}"
         for r in session.scalars(select(ChangeReport).order_by(ChangeReport.id))
     ]
 

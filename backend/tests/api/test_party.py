@@ -18,7 +18,7 @@ UNKNOWN_LINK_MESSAGE = "Gebruik de persoonlijke link uit je e-mail"
 
 def _reports(session: Session) -> list[str]:
     return [
-        r.message
+        f"{r.party.name}: {r.message}"
         for r in session.scalars(select(ChangeReport).order_by(ChangeReport.id))
     ]
 
@@ -157,7 +157,7 @@ class TestPartyApi:
         assert body["people"] == 5
         assert body["answered_at"] is not None
         assert _reports(session) == [
-            "Familie Jansen komt met 5: 1 vegetarisch, 2 eet alles, 2 kindermenu's."
+            "Familie Jansen: Komt met 5: 1 vegetarisch, 2 eet alles, 2 kindermenu's."
         ]
 
     def test_answer_coming_replaces_the_guess(
@@ -210,7 +210,7 @@ class TestPartyApi:
 
         assert second.status_code == 200
         assert second.get_json()["answered_at"] == first.get_json()["answered_at"]
-        assert _reports(session) == ["Familie Jansen komt met 2: 2 eet alles."]
+        assert _reports(session) == ["Familie Jansen: Komt met 2: 2 eet alles."]
 
     def test_a_changed_answer_queues_another_report(
         self,
@@ -230,8 +230,8 @@ class TestPartyApi:
         )
 
         assert _reports(session) == [
-            "Familie Jansen komt met 2: 2 eet alles.",
-            "Familie Jansen komt met 3: 2 eet alles, 1 kindermenu.",
+            "Familie Jansen: Komt met 2: 2 eet alles.",
+            "Familie Jansen: Komt met 3: 2 eet alles, 1 kindermenu.",
         ]
 
     def test_answer_not_coming(
@@ -252,7 +252,7 @@ class TestPartyApi:
         assert body["counts"] == _counts()
         assert body["people"] == 0
         assert body["answered_at"] is not None
-        assert _reports(session) == ["Familie de Boer komt niet."]
+        assert _reports(session) == ["Familie de Boer: Komt niet."]
 
     def test_answer_not_coming_ignores_counts_it_is_given(
         self, client: FlaskClient, de_boer_headers: dict[str, str]
@@ -281,7 +281,7 @@ class TestPartyApi:
             )
             assert response.status_code == 200
 
-        assert _reports(session) == ["Familie de Boer komt niet."]
+        assert _reports(session) == ["Familie de Boer: Komt niet."]
 
     def test_answer_not_coming_releases_dishes_and_servies(
         self,

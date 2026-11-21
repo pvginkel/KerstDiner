@@ -99,8 +99,9 @@ class ServiceContainer(containers.DeclarativeContainer):
     )
     register_for_background_startup(lambda c: c.task_service().startup())
 
-    # The report queue: the notification bridge, the thread that sends the
-    # queued reports, and the queue the household's changes write to.
+    # The report queue: the notification bridge, the thread that sends each
+    # household's queued changes once its timer runs out, and the queue the
+    # household's changes write to.
     notification_bridge_client = providers.Singleton(
         NotificationBridgeClient,
         base_url=app_config.provided.notification_bridge_url,
@@ -113,6 +114,7 @@ class ServiceContainer(containers.DeclarativeContainer):
         bridge_client=notification_bridge_client,
         settings=config,
         lifecycle_coordinator=lifecycle_coordinator,
+        batch_seconds=app_config.provided.report_batch_seconds,
     )
     register_for_background_startup(lambda c: c.report_sender().start())
     report_queue = providers.Factory(
