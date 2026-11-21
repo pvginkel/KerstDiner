@@ -189,39 +189,60 @@ How a deploy applies it:
 
 ## Change reports
 
-Each change a household saves produces one Telegram message, in Dutch, with an *Open* button to
-`/admin`:
+Every change a household saves reaches one Telegram chat, in Dutch. A household's changes go out
+together: each change starts that household's 5-minute timer again, and when the timer runs out,
+one message holds every change the household made since its last message. The message is headed by
+the household's name, in bold, lists the changes in the order they were made, and has an *Open*
+button to `/admin`:
 
 ```
-Familie Jansen komt met 5: 1 vegetarisch, 2 eet alles, 2 kindermenu's.
-Familie de Boer komt niet.
-Familie Jansen maakt Tiramisu.
-Familie Jansen maakt Tiramisu toch niet.
-Familie Jansen neemt 20 borden mee.
-Familie Jansen neemt 20 borden toch niet mee.
+Familie Jansen
+• Komt met 5: 1 vegetarisch, 2 eet alles, 2 kindermenu's.
+• Maakt Tiramisu.
+• Neemt 20 borden mee.
+```
+
+Each change is one line:
+
+```
+Komt met 5: 1 vegetarisch, 2 eet alles, 2 kindermenu's.
+Komt niet.
+Maakt Tiramisu.
+Maakt Tiramisu toch niet.
+Neemt 20 borden mee.
+Neemt 20 borden toch niet mee.
 ```
 
 The attendance line leaves out the groups at zero and counts the young children among who comes. A
-save that changes nothing sends nothing. Declining sends "komt niet" alone: the dishes and servies it
-releases are not reported one by one.
+save that changes nothing sends nothing. Declining sends "Komt niet." alone: the dishes and servies
+it releases are not reported one by one. A change and its undoing within one timer, such as taking a
+dish and giving it back, are both listed. Each household has its own timer, so two households'
+changes never share a message.
 
 How a message is sent:
 
-- **Queued with the change:** the change writes its message to a queue table in the same
-  transaction.
-- **Sent in the background:** a background thread in the backend sends queued messages in order and
-  marks each one sent. The backend runs as one replica, but a rollout briefly runs two, each with its
-  thread. A thread locks the message it is sending, so the other waits on it: each message goes out
-  once, and none before an earlier one.
+- **Queued with the change:** the change writes its line, with its household, to a queue table in
+  the same transaction.
+- **The timer:** a household's timer is the time of its newest queued line, kept in the database, so
+  a restart of the pod neither loses a timer nor starts it again. `REPORT_BATCH_SECONDS` sets its
+  length, 300 by default; the tests set it short.
+- **Sent in the background:** a background thread in the backend sleeps until the next household's
+  timer runs out, or until a change is committed, sends each household's message whose timer ran
+  out, the longest-waiting first, and marks its lines sent. The backend runs as one replica, but a
+  rollout briefly runs two, each with its thread. A thread locks the lines it is sending, so the
+  other waits on them: each line goes out once, in its household's message.
 - **Where it goes:** each message goes to the notification bridge under a `kerstdiner` registration
-  (`POST /v1/submit`, the *Open* button its `url`, `BASEURL` + `/admin`). That registration has one
-  Telegram chat: a group you create, add the bot to, and share. A send counts as failed unless the
-  bridge answers that Telegram took it.
+  (`POST /v1/submit`: the household's name its `title`, which Telegram shows in bold, the lines a
+  Markdown list its `message`, the *Open* button its `url`, `BASEURL` + `/admin`). A message that
+  would pass the bridge's 4096 characters goes out as two or more, each under the name. That
+  registration has one Telegram chat: a group you create, add the bot to, and share. A send counts as
+  failed unless the bridge answers that Telegram took it.
 - **Its configuration:** the deploy sets `NOTIFICATIONS_URL` (the bridge's in-cluster address,
   port 8090) and `NOTIFICATIONS_TOKEN` (the registration's bearer token, a secret). Under
   `FLASK_ENV=production` the backend refuses to start without them; elsewhere the messages stay
   queued.
-- **Failures:** a failed send stays queued and is tried again a minute later.
+- **Failures:** a failed send stays queued and is tried again a minute later, with the household's
+  changes that came in meanwhile.
 
 This way a household's click never waits on Telegram or fails because of it, and no report is lost.
 The queue is plumbing: it is not part of the data model.
@@ -487,7 +508,8 @@ gets a non-critical check on its `/healthz`, registered when the bridge is confi
   - the admin endpoints;
   - the report queue, against the approved stand-in for the bridge: a small fake of its
     `/v1/submit` and `/healthz` in `backend/tests/support/`, served over HTTP on a free port, which
-    records what it was sent and can be told to fail.
+    records what it was sent and can be told to fail. The timer tests date the queued lines back
+    rather than wait, and the running sender's tests use a timer of a second or two.
 - **Playwright:**
   - The household page: answering, taking, releasing, a lost race and declining, servies included.
   - The admin page: the table, copying a link and replacing one.
