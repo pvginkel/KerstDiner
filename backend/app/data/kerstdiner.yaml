@@ -24,15 +24,15 @@ households:
     guess: {normaal: 2}
   - key: jeroen-margot
     name: Jeroen & Margôt
-    guess: {vegetarisch: 2}
+    guess: {vegetarisch: 1, vegan: 1}
   - key: riske-max
     name: Riske & Max
-    guess: {vegan: 2}
+    guess: {vegetarisch: 1, vegan: 1}
   - key: mels
     name: Mels
     guess: {vegetarisch: 1}
   - key: mums
-    name: Mums
+    name: Hennie
     guess: {normaal: 1}
 
 # A dish is made for vegan, vegetarisch and normaal at most; without "for", for
