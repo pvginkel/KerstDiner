@@ -191,8 +191,9 @@ How a deploy applies it:
 - **Removed household, dish or servies item:** it disappears from the site, and its claims go with
   it.
 - **Keys:** a `key` never changes. Renaming a household means changing its `name`.
-- **Photos:** a dish's go in `frontend/public/gerechten/`, a servies item's in
-  `frontend/public/servies/`. A tile without a photo shows a neutral placeholder.
+- **Photos:** square, about 800×800; a dish's go in `frontend/public/gerechten/`, a servies item's
+  in `frontend/public/servies/`. A tile's photo frame is square, so the photo shows whole. A tile
+  without a photo shows a neutral placeholder.
 - **Reset:** when `reset` is higher than the value last applied, the deploy clears every answer,
   claim and link, then applies the file as if for the first time. Every household is back on your
   guess, with a new link. This is the one reset that swaps the test data for the real data. The

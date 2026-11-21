@@ -42,7 +42,7 @@ export function ClaimTile({ photo, title, detail, state, status, onClick, disabl
         disabled && state !== 'taken' && 'opacity-75',
       )}
     >
-      <span className="relative block aspect-[4/3] overflow-hidden bg-muted">
+      <span className="relative block aspect-square overflow-hidden bg-muted">
         {photo ? (
           <img
             src={photo}
