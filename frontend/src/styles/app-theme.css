@@ -5,9 +5,12 @@
  * App-owned — not overwritten by template updates.
  *
  * - The tokens below override index.css's, in light and dark mode alike: the
- *   site has one look.
+ *   site has one look, and it is a dark one. `color-scheme: dark` here and in
+ *   index.html says so, so a browser's forced dark mode leaves it alone, and
+ *   index.html's darkreader-lock keeps Dark Reader off it.
  * - Utilities: font-festive (headings), gold-foil (gold heading text),
- *   gold-frame (the cards' gold border) and the snow and twinkle animations.
+ *   gold-frame (the cards' gold border), and the animations of the snow, the
+ *   sparkles, the fairy lights' bulbs, the birds' flight and the squirrel.
  * - The decorations themselves are React components in src/components/kerst/.
  * - Fonts and their licences live in src/assets/fonts/ and are bundled by Vite.
  */
@@ -47,6 +50,12 @@
 
   --animate-snowfall: snowfall 12s linear infinite;
   --animate-twinkle: twinkle 2.6s ease-in-out infinite;
+  --animate-bulb-flash: bulb-flash 1.7s ease-in-out infinite;
+  --animate-bird-flight: bird-flight 30s linear infinite;
+  --animate-wing-beat: wing-beat 0.4s ease-in-out infinite;
+  --animate-squirrel-hop: squirrel-hop 16s ease-in-out infinite;
+  --animate-squirrel-turn: squirrel-turn 16s step-end infinite;
+  --animate-squirrel-nod: squirrel-nod 16s ease-in-out infinite;
 
   @keyframes snowfall {
     from {
@@ -65,11 +74,173 @@
       opacity: 0.35;
     }
   }
+
+  /* The fairy lights' bulbs: lit, then nearly out, then lit again. */
+  @keyframes bulb-flash {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.08;
+    }
+  }
+
+  /* A bird crosses the sky in the first 70% of its time, rising and falling a
+     little, and waits off the right edge for the rest. */
+  @keyframes bird-flight {
+    0% {
+      transform: translate3d(-3rem, 0, 0);
+    }
+    23% {
+      transform: translate3d(calc(33vw - 1rem), -1.2rem, 0);
+    }
+    47% {
+      transform: translate3d(calc(67vw + 1rem), 0.6rem, 0);
+    }
+    70%, 100% {
+      transform: translate3d(calc(100vw + 3rem), -0.8rem, 0);
+    }
+  }
+
+  /* The wings fold down past the body and come up again. */
+  @keyframes wing-beat {
+    0%, 100% {
+      transform: scaleY(1);
+    }
+    50% {
+      transform: scaleY(-0.55);
+    }
+  }
+
+  /* The squirrel sniffs where it sits, hops five of its widths to the left,
+     digs, hops back, and nibbles its nut. Its turns and nods keep time with
+     these hops: all three animations last as long. */
+  @keyframes squirrel-hop {
+    0% {
+      transform: translate(0, 0);
+    }
+    6% {
+      transform: translate(0, 0);
+    }
+    7.5% {
+      transform: translate(-40%, -42%);
+    }
+    9% {
+      transform: translate(-80%, 0);
+    }
+    10.5% {
+      transform: translate(-120%, -42%);
+    }
+    12% {
+      transform: translate(-160%, 0);
+    }
+    13.5% {
+      transform: translate(-200%, -42%);
+    }
+    15% {
+      transform: translate(-240%, 0);
+    }
+    16.5% {
+      transform: translate(-280%, -42%);
+    }
+    18% {
+      transform: translate(-320%, 0);
+    }
+    19.5% {
+      transform: translate(-360%, -42%);
+    }
+    21% {
+      transform: translate(-400%, 0);
+    }
+    22.5% {
+      transform: translate(-440%, -42%);
+    }
+    24% {
+      transform: translate(-480%, 0);
+    }
+    40% {
+      transform: translate(-480%, 0);
+    }
+    43.5% {
+      transform: translate(-440%, -42%);
+    }
+    45% {
+      transform: translate(-400%, 0);
+    }
+    46.5% {
+      transform: translate(-360%, -42%);
+    }
+    48% {
+      transform: translate(-320%, 0);
+    }
+    49.5% {
+      transform: translate(-280%, -42%);
+    }
+    51% {
+      transform: translate(-240%, 0);
+    }
+    52.5% {
+      transform: translate(-200%, -42%);
+    }
+    54% {
+      transform: translate(-160%, 0);
+    }
+    55.5% {
+      transform: translate(-120%, -42%);
+    }
+    57% {
+      transform: translate(-80%, 0);
+    }
+    58.5% {
+      transform: translate(-40%, -42%);
+    }
+    60% {
+      transform: translate(0%, 0);
+    }
+    100% {
+      transform: translate(0, 0);
+    }
+  }
+
+  @keyframes squirrel-turn {
+    0%, 40% {
+      transform: scaleX(1);
+    }
+    41%, 77% {
+      transform: scaleX(-1);
+    }
+    78%, 100% {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes squirrel-nod {
+    0%, 1%, 5%, 25%, 39%, 61%, 76%, 100% {
+      transform: rotate(0deg);
+    }
+    3% {
+      transform: rotate(-9deg);
+    }
+    28%, 31%, 34%, 37% {
+      transform: rotate(-16deg);
+    }
+    29.5%, 32.5%, 35.5% {
+      transform: rotate(-6deg);
+    }
+    64%, 70% {
+      transform: rotate(-8deg);
+    }
+    67%, 73% {
+      transform: rotate(-2deg);
+    }
+  }
 }
 
 @layer base {
   :root {
-    color-scheme: light;
+    /* The site's one theme is its dark theme (index.html says so too). */
+    color-scheme: dark;
+    background-color: var(--color-kerst-pine);
 
     --background: 155 70% 11%;
     --foreground: 40 70% 96%;
@@ -107,6 +278,7 @@
   }
 
   body {
+    background-color: var(--color-kerst-pine);
     font-family: var(--font-sans);
     font-size: 1.0625rem;
     line-height: 1.5;
@@ -157,13 +329,32 @@
   background-attachment: local;
 }
 
-/* Snow and lights stand still for whoever asks for less motion. */
+/* The squirrel's three boxes turn around their feet. */
+.animate-squirrel-turn,
+.animate-squirrel-nod {
+  transform-origin: 50% 100%;
+}
+
+/* A bird's wings beat around its body, at (0, 0) of its drawing. */
+.animate-wing-beat {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+/* Snow, lights, birds and the squirrel stand still for whoever asks for less
+   motion: the snow and the flying birds go, the lights stay lit and the
+   squirrel sits where it is. */
 @media (prefers-reduced-motion: reduce) {
-  .animate-snowfall {
+  .animate-snowfall,
+  .bird-flight {
     animation: none;
     display: none;
   }
-  .animate-twinkle {
+  .animate-twinkle,
+  .animate-bulb-flash,
+  .animate-squirrel-hop,
+  .animate-squirrel-turn,
+  .animate-squirrel-nod {
     animation: none;
   }
 }

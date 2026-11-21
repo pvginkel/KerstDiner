@@ -1,5 +1,6 @@
 import { FlyingBirds, Robin } from './birds'
 import { LeapingDeer, Stag } from './deer'
+import { Acorn, ForagingSquirrel } from './squirrel'
 
 /** A snow-capped pine tree standing on (x, y), `h` tall. */
 function PineTree({ x, y, h }: { x: number; y: number; h: number }) {
@@ -25,28 +26,38 @@ function PineTree({ x, y, h }: { x: number; y: number; h: number }) {
 
 /**
  * A snowy field along the bottom of the page: pine trees, deer and robins,
- * birds flying over. On a phone the sides are cut off; the deer and the robin
- * stay in the middle.
+ * birds flying over, and a squirrel foraging in the snow.
+ *
+ * The drawing is shown whole at every width: it is as wide as the page, at
+ * least 60rem and at most 1800px, and as tall as that width makes it. On a
+ * phone the sides are cut off, and the deer, the robin and the squirrel stay
+ * in the middle; past 1800px the snow runs on to both edges.
  */
 export function Scenery() {
   return (
-    <div aria-hidden className="pointer-events-none relative z-0 mt-4 h-[clamp(13rem,24vw,19rem)] w-full shrink-0">
-      <svg viewBox="0 0 1200 260" preserveAspectRatio="xMidYMax slice" className="absolute inset-0 h-full w-full">
-        <path d="M0 170 Q200 118 420 158 T840 148 T1200 136 V260 H0 Z" fill="#dce9f2" />
-        <PineTree x={110} y={176} h={130} />
-        <PineTree x={215} y={160} h={92} />
-        <PineTree x={330} y={160} h={64} />
-        <PineTree x={880} y={150} h={118} />
-        <PineTree x={985} y={146} h={84} />
-        <PineTree x={1100} y={140} h={136} />
-        <path d="M0 214 Q300 172 600 204 T1200 196 V260 H0 Z" fill="#ffffff" />
-        <Stag x={372} y={58} width={142} height={154} className="text-kerst-gold-dark" />
-        <LeapingDeer x={700} y={30} width={102} height={150} className="text-kerst-gold" />
-        <Robin x={556} y={158} width={58} height={54} />
-        <Robin x={872} y={66} width={40} height={37} />
-        <FlyingBirds x={500} y={4} width={120} height={67} className="text-kerst-gold-light" />
-        <FlyingBirds x={150} y={14} width={86} height={48} className="text-kerst-gold-light" />
-      </svg>
+    <div aria-hidden className="pointer-events-none relative z-0 mt-4 w-full shrink-0 overflow-x-clip">
+      <div className="relative left-1/2 aspect-[1200/260] w-[clamp(60rem,100%,1800px)] -translate-x-1/2">
+        <svg viewBox="0 0 1200 260" overflow="visible" className="absolute inset-0 h-full w-full">
+          <path d="M-2400 170 L0 170 Q200 118 420 158 T840 148 T1200 136 L3600 136 V260 H-2400 Z" fill="#dce9f2" />
+          <PineTree x={110} y={176} h={130} />
+          <PineTree x={215} y={160} h={92} />
+          <PineTree x={330} y={160} h={64} />
+          <PineTree x={880} y={150} h={118} />
+          <PineTree x={985} y={146} h={84} />
+          <PineTree x={1100} y={140} h={136} />
+          <path d="M-2400 214 L0 214 Q300 172 600 204 T1200 196 L3600 196 V260 H-2400 Z" fill="#ffffff" />
+          <Stag x={372} y={58} width={142} height={154} className="text-kerst-gold-dark" />
+          <LeapingDeer x={700} y={30} width={102} height={150} className="text-kerst-gold" />
+          <Robin x={556} y={158} width={58} height={54} />
+          <Robin x={872} y={66} width={40} height={37} />
+          <FlyingBirds x={500} y={4} width={120} height={67} className="text-kerst-gold-light" />
+          <FlyingBirds x={150} y={14} width={86} height={48} className="text-kerst-gold-light" />
+          <Acorn x={636} y={222} size={9} tilt={-20} />
+          <Acorn x={812} y={226} size={8} tilt={35} />
+        </svg>
+        {/* At x 790 to 822, its feet on the snow at y 226; it forages leftwards to about x 640. */}
+        <ForagingSquirrel className="absolute left-[65.83%] top-[74.6%] w-[2.67%]" />
+      </div>
     </div>
   )
 }

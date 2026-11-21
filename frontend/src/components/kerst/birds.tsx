@@ -54,3 +54,50 @@ export function FlyingBirds(props: SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
+
+/**
+ * One bird in flight, seen from the side, its wings beating (app-theme.css:
+ * the wings fold down and up again around its body at (0, 0)).
+ */
+function Bird({ beat }: { beat: string }) {
+  return (
+    <svg viewBox="-22 -12 44 20" fill="currentColor" aria-hidden className="block h-auto w-full overflow-visible">
+      <g className="animate-wing-beat" style={{ animationDuration: beat }}>
+        <path d="M-1 0 C-5 -7 -12 -9 -21 -6 C-13 -5.5 -7 -2.5 -2 2 Z" />
+        <path d="M1 0 C5 -7 12 -9 21 -6 C13 -5.5 7 -2.5 2 2 Z" />
+      </g>
+      <ellipse cx={0} cy={1} rx={5.5} ry={1.9} />
+      <path d="M5 0.2 L8 1 L5 1.8 Z" />
+      <path d="M-5 0.4 L-9 -0.6 L-8.2 1.4 L-5 1.8 Z" />
+    </svg>
+  )
+}
+
+/** The birds crossing the sky: their height, size, and how long a crossing takes. */
+const FLIGHTS = [
+  { top: '9%', width: '2.4rem', duration: '27s', delay: '-4s', beat: '0.42s', phoneToo: true },
+  { top: '17%', width: '1.7rem', duration: '34s', delay: '-21s', beat: '0.36s', phoneToo: true },
+  { top: '30%', width: '2rem', duration: '41s', delay: '-33s', beat: '0.4s', phoneToo: false },
+]
+
+/**
+ * Birds flying across the sky, left to right, behind the cards and tiles. A
+ * crossing is a transform of the bird's box, which the browser runs off the
+ * main thread; a phone gets two birds, a larger screen three. They never take
+ * a tap, and they stay away for whoever asks for less motion (app-theme.css).
+ */
+export function BirdFlight() {
+  return (
+    <div aria-hidden className="bird-flight pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      {FLIGHTS.map((flight, i) => (
+        <div
+          key={i}
+          className={`absolute left-0 animate-bird-flight text-kerst-gold-light ${flight.phoneToo ? '' : 'hidden sm:block'}`}
+          style={{ top: flight.top, width: flight.width, animationDuration: flight.duration, animationDelay: flight.delay }}
+        >
+          <Bird beat={flight.beat} />
+        </div>
+      ))}
+    </div>
+  )
+}

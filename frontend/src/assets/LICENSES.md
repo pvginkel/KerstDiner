@@ -14,18 +14,23 @@ Both are Google Fonts' Latin subsets, unmodified.
 ## Silhouettes (`src/components/kerst/`)
 
 From svgsilh.com, which releases all its images under CC0 1.0 (no attribution needed). The path
-data is inlined unchanged.
+data is inlined unchanged, except where the table says otherwise.
 
 | Component | Source |
 |---|---|
 | `Stag` (`deer.tsx`) | https://svgsilh.com/image/2682005.html |
 | `LeapingDeer` (`deer.tsx`) | https://svgsilh.com/image/23951.html |
+| `WalkingDoe` (`deer.tsx`) | https://svgsilh.com/image/48426.html |
+| `Fawn` (`deer.tsx`) | https://svgsilh.com/image/304108.html |
+| `GrazingDeer` (`deer.tsx`) | https://svgsilh.com/image/1966959.html, without the stroke of ground under one hoof |
 | `FlyingBirds` (`birds.tsx`) | https://svgsilh.com/image/1320972.html |
+| `Squirrel` (`squirrel.tsx`) | https://svgsilh.com/image/1456764.html |
 
 ## Drawn for KerstDiner (`src/components/kerst/`)
 
-The holly, the robin, the fairy lights, the snowflakes, the baubles, the sparkles and the pine
-trees are KerstDiner's own drawings.
+The holly, the robin, the fairy lights, the snowflakes, the baubles, the sparkles, the pine
+trees, the birds crossing the sky, the acorns and the moon are KerstDiner's own drawings, and so is
+the favicon (`public/favicon.svg`, with `favicon.ico` and `apple-touch-icon.png` rendered from it).
 
 ## The preview's placeholder photos (`src/preview/photos/`)
 

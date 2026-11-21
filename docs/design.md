@@ -99,14 +99,26 @@ order, and a totals row:
 The whole site, the household page and `/admin`, is in an over-the-top Christmas style, as Mariska
 asked ("I like it over the top"). She approved it from screenshots on 2026-11-20.
 
-- **Colours and decoration:** red, green and gold on a dark green night sky, with fairy lights,
-  baubles, falling snow, gold sparkles and holly. Headings are in a festive font (Mountains of
-  Christmas), everything else in a readable one (Nunito).
-- **Deer and birds:** gold stags beside the page's title, and a snowy field at the bottom with deer,
-  robins and birds in flight.
+- **Colours and decoration:** red, green and gold on a dark green night sky with a crescent moon,
+  with fairy lights whose bulbs flash on and off, baubles, falling snow, gold sparkles and holly.
+  Headings are in a festive font (Mountains of Christmas), everything else in a readable one
+  (Nunito).
+- **Deer, birds and a squirrel:** beside the page's title, deer in poses of their own, none
+  mirrored: on a computer a doe walking with her fawn on the left and a deer grazing on the right;
+  on a phone the fawn beside the line above the title, with the moon on its other side. Birds fly
+  across the sky, and at the bottom a snowy field holds deer, robins, birds and a squirrel that
+  hops through the snow looking for nuts. The field is shown whole at every width: on a phone its
+  sides are cut off, never its top.
 - **No Santa Claus** anywhere.
-- **Easy on a phone:** large plain text and buttons and tiles big enough to tap. The snow falls
-  behind the cards, and it stops for whoever asks their device for less motion.
+- **Easy on a phone:** large plain text and buttons and tiles big enough to tap. The snow and the
+  birds pass behind the cards. Every animation moves by transforms the browser runs off the main
+  thread, a phone gets fewer birds, and it all stands still for whoever asks their device for less
+  motion: the snow and the flying birds go, the lights stay lit and the squirrel sits.
+- **Dark by design:** the site has one theme, and it declares it a dark one (`color-scheme: dark`,
+  `<meta name="color-scheme" content="dark">` and Dark Reader's `<meta name="darkreader-lock">`),
+  so a browser's forced dark mode and Dark Reader leave it as it is.
+- **Its own favicon:** a Christmas tree with a gold star and red baubles on a gold-edged green
+  tile, as an SVG, an ICO and an Apple touch icon.
 
 It lives in the frontend. The theme is `frontend/src/styles/app-theme.css`, with the button and card
 variants beside it. The decorations and the page's building blocks (frame, header, card, tile,
