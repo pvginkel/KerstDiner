@@ -1,14 +1,14 @@
 # KerstDiner's households, dishes and servies (docs/design.md, "The config file").
 # Every deploy syncs this file into the database.
 
-reset: 2    # raise to wipe every answer, claim and link on the next deploy
+reset: 3    # raise to wipe every answer, claim and link on the next deploy
 
 # A household's guess counts vegan, vegetarisch, normaal (eet alles) and kind
 # (kindermenu <6jr: only children under 6; older children count as adults do).
 # A category left out is 0.
 households:
   - key: hosts
-    name: Hosts
+    name: De Organisatie
     guess: {vegetarisch: 1, normaal: 1}
   - key: hans-henny
     name: Hans & Henny
@@ -23,8 +23,14 @@ households:
     name: Jaap en Julian
     guess: {normaal: 2}
   - key: jeroen-margot
-    name: Jeroen, Margôt, kinderen en aanhang
-    guess: {vegetarisch: 3, vegan: 2}
+    name: Jeroen & Margôt
+    guess: {vegetarisch: 2}
+  - key: riske-max
+    name: Riske & Max
+    guess: {vegan: 2}
+  - key: mels
+    name: Mels
+    guess: {vegetarisch: 1}
   - key: mums
     name: Mums
     guess: {normaal: 1}
@@ -40,13 +46,13 @@ dishes:
     name: Roast potatoes of gebakken aardappeltjes
     image: aardappels.jpg
   - key: groente
-    name: Een groente zoals een spruitjes, boontjes, witlof, broccoli, bloemkool; iets eenvoudigs
+    name: Een of meer groentes, zoals spruitjes, boontjes, witlof, broccoli, bloemkool
     image: groente.jpg
   - key: stoofperen
     name: Stoofperen
     image: stoofperen.jpg
   - key: vegan-burger
-    name: Vegan burger (dus ook voor de vegetarier)
+    name: Vegan burger
     for: [vegan, vegetarisch]
     image: vegan-burger.jpg
   - key: vlees
@@ -58,7 +64,7 @@ dishes:
     for: [vegan]
     image: toetje-vegan.jpg
   - key: toetje-vega
-    name: Vega toetje (geen alleseter toetje, dus bv. geen bavarois)
+    name: Vegetarisch toetje (geen alleseter toetje, dus bv. geen bavarois)
     for: [vegetarisch, normaal]
     image: toetje-vega.jpg
 
