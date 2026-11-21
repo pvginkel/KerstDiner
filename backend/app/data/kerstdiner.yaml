@@ -1,62 +1,65 @@
 # KerstDiner's households, dishes and servies (docs/design.md, "The config file").
 # Every deploy syncs this file into the database.
-#
-# THIS IS TEST DATA, for the operator's test in production. The one reset
-# replaces it with the real households, dishes and servies.
 
-reset: 1    # raise to wipe every answer, claim and link on the next deploy
+reset: 2    # raise to wipe every answer, claim and link on the next deploy
 
 # A household's guess counts vegan, vegetarisch, normaal (eet alles) and kind
 # (kindermenu <6jr: only children under 6; older children count as adults do).
 # A category left out is 0.
 households:
-  - key: jansen
-    name: Familie Jansen
-    guess: {vegetarisch: 1, normaal: 2, kind: 2}
-  - key: oma-opa
-    name: Oma en opa
+  - key: hosts
+    name: Hosts
+    guess: {vegetarisch: 1, normaal: 1}
+  - key: hans-henny
+    name: Hans & Henny
     guess: {normaal: 2}
-  - key: tante-els
-    name: Tante Els
-    guess: {vegan: 1}
-  - key: de-boer
-    name: Familie de Boer
-    guess: {normaal: 2, kind: 1}
-  - key: wij
-    name: Wij
+  - key: erik-maartje
+    name: Erik, Maartje en de kinderen
+    guess: {normaal: 2, kind: 2}
+  - key: kimberley
+    name: Kimberley
+    guess: {normaal: 1}
+  - key: jaap-julian
+    name: Jaap en Julian
     guess: {normaal: 2}
+  - key: jeroen-margot
+    name: Jeroen, Margôt, kinderen en aanhang
+    guess: {vegetarisch: 3, vegan: 2}
+  - key: mums
+    name: Mums
+    guess: {normaal: 1}
 
 # A dish is made for vegan, vegetarisch and normaal at most; without "for", for
 # all three. No dish is made for the kindermenu. "image" is a file in
 # frontend/public/gerechten/; without one the tile shows a placeholder.
 dishes:
   - key: soep
-    name: Pompoensoep
-  - key: groenten
-    name: Geroosterde groenten
-  - key: rollade
-    name: Rollade
-    for: [normaal]
-  - key: wellington
-    name: Linzen-wellington
+    name: Vegan soep
+  - key: aardappels
+    name: Roast potatoes of gebakken aardappeltjes
+  - key: groente
+    name: Een groente zoals een spruitjes, boontjes, witlof, broccoli, bloemkool; iets eenvoudigs
+  - key: stoofperen
+    name: Stoofperen
+  - key: vegan-burger
+    name: Vegan burger (dus ook voor de vegetarier)
     for: [vegan, vegetarisch]
-  - key: gratin
-    name: Aardappelgratin
-    for: [vegetarisch, normaal]
-  - key: salade
-    name: Wintersalade
-  - key: tiramisu
-    name: Tiramisu
+  - key: vlees
+    name: Stukje vlees naar keuze (bv. kip, burger, stoofvlees, etc) - biologisch, geen rundvlees
+    for: [normaal]
+  - key: toetje-vegan
+    name: Vegan toetje
+    for: [vegan]
+  - key: toetje-vega
+    name: Vega toetje (geen alleseter toetje, dus bv. geen bavarois)
     for: [vegetarisch, normaal]
 
 # Servies: "text" is what the tile says. "image" is a file in
 # frontend/public/servies/; without one the tile shows a placeholder.
 servies:
-  - key: borden
-    text: 20 borden
-  - key: wijnglazen
-    text: 20 wijnglazen
-  - key: bestek
-    text: 20 setjes bestek
-  - key: schalen
-    text: 4 serveerschalen
+  - key: mokken
+    text: 2 mokken
+  - key: soepkommen
+    text: 4 soepkommen
+  - key: grote-borden
+    text: 5 grote borden

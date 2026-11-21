@@ -34,9 +34,9 @@ from tests.conftest_infrastructure import *  # noqa: F403
 # ---------------------------------------------------------------------------
 
 # The run's databases are built by the revisions and the post-migration hook,
-# so they hold app/data/kerstdiner.yaml's test data. A test that needs a
-# known state applies a config of its own with ``apply_config`` or ``seeded``,
-# which wipe that first.
+# so they hold app/data/kerstdiner.yaml's households, dishes and servies. A
+# test that needs a known state applies a config of its own with
+# ``apply_config`` or ``seeded``, which wipe that first.
 SEED_CONFIG: dict[str, Any] = {
     "reset": 1,
     "households": [

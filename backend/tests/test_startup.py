@@ -47,6 +47,30 @@ def _write(tmp_path: Path, text: str) -> Path:
     return path
 
 
+_JANSEN_FILE = (
+    "reset: 1\n"
+    "households:\n"
+    "  - {key: jansen, name: Familie Jansen,"
+    " guess: {vegetarisch: 1, normaal: 2, kind: 2}}\n"
+    "  - {key: de-boer, name: Familie de Boer, guess: {normaal: 2}}\n"
+    "dishes:\n  - {key: soep, name: Pompoensoep}\n"
+    "servies:\n  - {key: borden, text: 20 borden}\n"
+)
+"""A config file with the household jansen, whatever the shipped file holds."""
+
+
+@pytest.fixture
+def jansen_file(
+    committed_app: Flask, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> Path:
+    """``_JANSEN_FILE`` as the config file, applied to an empty database."""
+    path = _write(tmp_path, _JANSEN_FILE)
+    monkeypatch.setattr("app.schemas.config_file.CONFIG_FILE", path)
+    _wipe(committed_app)
+    sync_config_file(committed_app)
+    return path
+
+
 class TestSyncConfigFile:
     """``sync_config_file`` and the hooks that call it."""
 
@@ -122,9 +146,12 @@ class TestSyncConfigFile:
         assert after == before
 
     def test_a_raised_reset_clears_the_answers_and_says_so(
-        self, committed_app: Flask, capsys: pytest.CaptureFixture[str]
+        self,
+        committed_app: Flask,
+        jansen_file: Path,
+        capsys: pytest.CaptureFixture[str],
     ) -> None:
-        config = load_config_file(CONFIG_FILE)
+        config = load_config_file(jansen_file)
         with _fresh_session(committed_app) as session:
             old_tokens = {p.key: p.link_token for p in session.scalars(select(Party))}
             jansen = session.scalars(select(Party).where(Party.key == "jansen")).one()
@@ -154,7 +181,10 @@ class TestSyncConfigFile:
         )
 
     def test_keeps_the_answers_when_the_reset_is_not_raised(
-        self, committed_app: Flask, capsys: pytest.CaptureFixture[str]
+        self,
+        committed_app: Flask,
+        jansen_file: Path,
+        capsys: pytest.CaptureFixture[str],
     ) -> None:
         with _fresh_session(committed_app) as session:
             jansen = session.scalars(select(Party).where(Party.key == "jansen")).one()
