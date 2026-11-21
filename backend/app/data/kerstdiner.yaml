@@ -35,31 +35,42 @@ households:
 dishes:
   - key: soep
     name: Vegan soep
+    image: soep.jpg
   - key: aardappels
     name: Roast potatoes of gebakken aardappeltjes
+    image: aardappels.jpg
   - key: groente
     name: Een groente zoals een spruitjes, boontjes, witlof, broccoli, bloemkool; iets eenvoudigs
+    image: groente.jpg
   - key: stoofperen
     name: Stoofperen
+    image: stoofperen.jpg
   - key: vegan-burger
     name: Vegan burger (dus ook voor de vegetarier)
     for: [vegan, vegetarisch]
+    image: vegan-burger.jpg
   - key: vlees
     name: Stukje vlees naar keuze (bv. kip, burger, stoofvlees, etc) - biologisch, geen rundvlees
     for: [normaal]
+    image: vlees.jpg
   - key: toetje-vegan
     name: Vegan toetje
     for: [vegan]
+    image: toetje-vegan.jpg
   - key: toetje-vega
     name: Vega toetje (geen alleseter toetje, dus bv. geen bavarois)
     for: [vegetarisch, normaal]
+    image: toetje-vega.jpg
 
 # Servies: "text" is what the tile says. "image" is a file in
 # frontend/public/servies/; without one the tile shows a placeholder.
 servies:
   - key: mokken
     text: 2 mokken
+    image: mokken.jpg
   - key: soepkommen
     text: 4 soepkommen
+    image: soepkommen.jpg
   - key: grote-borden
     text: 5 grote borden
+    image: grote-borden.jpg
